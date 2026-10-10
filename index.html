@@ -38,6 +38,22 @@ function reportsPage(){document.getElementById('content').innerHTML=`<div class=
 
 // HTML exam bridge. Each HTML exam must implement the ASHRAF_IELTS_V1 protocol.
 let examFrame=null,examMode=null,examTest=null,examReview=null,examNonce=0;
+let examSecurityActive=false,examWarningCount=0,examWarningOpen=false,examLastWarning=0;
+function secureExamWarn(reason){
+ if(!examSecurityActive||examMode!=='take'||examWarningOpen)return;
+ if(Date.now()-examLastWarning<900)return;
+ examLastWarning=Date.now();examWarningOpen=true;examWarningCount++;
+ const count=document.getElementById('examSecurityCount');if(count)count.textContent='Security warnings: '+examWarningCount;
+ alert('IELTS EXAM SECURITY WARNING #'+examWarningCount+'\n'+reason+'\nPlease return to the exam and fullscreen. You may continue; warnings do not submit your exam.');
+ examWarningOpen=false;
+}
+function examSecurityStop(){examSecurityActive=false;examWarningOpen=false}
+document.addEventListener('fullscreenchange',()=>{if(examSecurityActive&&!document.fullscreenElement)secureExamWarn('You left fullscreen mode.')});
+document.addEventListener('visibilitychange',()=>{if(examSecurityActive&&document.hidden)secureExamWarn('You switched away from the exam tab.')});
+window.addEventListener('blur',()=>{if(examSecurityActive&&!document.hidden)secureExamWarn('The exam window lost focus.')});
+['contextmenu','copy','cut','paste'].forEach(type=>document.addEventListener(type,e=>{if(examSecurityActive){e.preventDefault();secureExamWarn('Copying, pasting and right-click are not allowed.')}},true));
+document.addEventListener('keydown',e=>{if(!examSecurityActive)return;const k=e.key.toLowerCase();if((e.ctrlKey||e.metaKey)&&['c','x','v','a','p','s','u'].includes(k)||k==='f12'){e.preventDefault();secureExamWarn('This keyboard shortcut is blocked during the exam.')}},true);
+
 const HTML_CHANNEL='ASHRAF_IELTS_V1';
 async function loadHtml(path){
  const objectRef=ref(storage,path);let firstError;
@@ -57,12 +73,12 @@ async function launchHtmlTest(t,mode,reviewState=null){
   let url=t.resourceURL||'';
   if(!url){try{url=await getDownloadURL(ref(storage,t.resourcePath))}catch(e){throw Error('Could not obtain the exam file link. Instructor: open Edit / Upload and paste the Firebase Storage file download URL in the new field. '+(e.message||e))}}
   if(!/^https:\/\/firebasestorage\.googleapis\.com\//i.test(url))throw Error('Invalid Firebase Storage file URL.');
-  clearInterval(timer);page='html-exam';render();
+  clearInterval(timer);examSecurityStop();examWarningCount=0;page='html-exam';render();
   document.getElementById('content').innerHTML=`<div class="head"><h1>${esc(t.title)} — ${mode==='review'?'Answer Review':mode==='preview'?'Instructor Preview':'Exam'}</h1><button class="btn secondary" id="exitHtml">${mode==='take'?'Exit without submitting':'Back to tests'}</button></div><div class="notice">${mode==='preview'?'Instructor preview — no result will be recorded.':mode==='review'?'Read-only review of your submitted answers.':'After checking your answers, press Submit Final Result inside the HTML exam. Wait for the saved confirmation.'}</div><iframe id="htmlExamFrame" sandbox="allow-scripts allow-forms allow-modals allow-downloads" allow="fullscreen" allowfullscreen style="width:100%;height:78vh;border:1px solid #cbd5e1;border-radius:12px;background:white" title="IELTS HTML Exam"></iframe>`;
   examFrame=document.getElementById('htmlExamFrame');examMode=mode;examTest=t;examReview=reviewState;const nonce=++examNonce;
   examFrame.addEventListener('load',()=>{if(nonce!==examNonce)return;if(mode==='review')examFrame.contentWindow.postMessage({channel:HTML_CHANNEL,type:'review',reviewState},'*')});
   examFrame.src=url;
-  document.getElementById('exitHtml').onclick=()=>{examNonce++;examFrame=null;examTest=null;examMode=null;page='tests';render()};
+  document.getElementById('exitHtml').onclick=()=>{examSecurityStop();examNonce++;examFrame=null;examTest=null;examMode=null;page='tests';render()};
  }catch(e){message(e);page='tests';render()}
 }
 window.addEventListener('message',async event=>{
