@@ -98,11 +98,11 @@ window.addEventListener('message',async event=>{
  try{
   const id=`${current.uid}_${t.id}`;
   // Firestore create-only rule prevents a second submission; do not read a missing document.
-  const data={testId:t.id,userId:current.uid,date:new Date().toISOString(),status:'Completed',score,maxScore:max,band,feedback:'',response:'HTML exam',answers:[],reviewState:d.reviewState||null,source:'html-bridge'};
+  const data={testId:t.id,userId:current.uid,date:new Date().toISOString(),status:'Completed',score,maxScore:max,band,feedback:'',response:'HTML exam',answers:[],reviewState:d.reviewState?JSON.parse(JSON.stringify(d.reviewState)):null,source:'html-bridge'};
   await setDoc(doc(fs,'submissions',id),data);
   source.postMessage({channel:HTML_CHANNEL,type:'saved'},event.origin);
   await refresh();
- }catch(e){source.postMessage({channel:HTML_CHANNEL,type:'error',message:e.message||String(e)},event.origin);message(e)}finally{busy=false}
+ }catch(e){let m=e.message||String(e);if(e.code==='permission-denied')m='Firestore refused the save (permission-denied). Check that this test is ACTIVE and ASSIGNED to you, that you have not already submitted it, and that the instructor has published the latest firestore.rules.';source.postMessage({channel:HTML_CHANNEL,type:'error',message:m},event.origin);message(e)}finally{busy=false}
 });
 
 onAuthStateChanged(auth,async user=>{current=user;profile=null;if(!user){clearInterval(timer);login();return}try{let snap=await getDoc(doc(fs,'users',user.uid));if(!snap.exists()||!snap.data().active){root.innerHTML='<div class="login"><div class="loginbox"><h2>Account not authorized</h2><p>Ask your instructor to activate your account in the IELTS Firebase project.</p><button id="exit" class="btn">Sign out</button></div></div>';document.getElementById('exit').onclick=()=>signOut(auth);return}profile=snap.data();await refresh();page='dashboard';render()}catch(e){root.innerHTML=`<div class="login"><div class="loginbox"><h2>Firebase connection error</h2><p class="error">${esc(e.message)}</p><button id="exit" class="btn">Sign out</button></div></div>`;document.getElementById('exit').onclick=()=>signOut(auth)}});login();
