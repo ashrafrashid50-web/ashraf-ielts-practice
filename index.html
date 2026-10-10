@@ -37,51 +37,48 @@ function viewResult(id){let s=ownSub(id);showModal(`<h2>${esc(byId(id)?.title)}<
 function reportsPage(){document.getElementById('content').innerHTML=`<div class="head"><h1>${isAdmin()?'Progress reports':'My results'}</h1>${isAdmin()?'<button class="btn" id="csv">Export CSV</button>':''}</div><div class="card">${tableSub(submissions.slice().reverse())}</div>`;wireGrades();if(isAdmin())document.getElementById('csv').onclick=()=>{let rows=[['Trainee','Username','Section','Test','Date','Status','Score','Maximum','Band','Feedback'],...submissions.map(s=>{let u=users.find(x=>x.id===s.userId),t=byId(s.testId);return [u?.name,u?.username||u?.email,t?.cat,t?.title,s.date,s.status,s.score,s.maxScore,s.band,s.feedback]})];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='ashraf-ielts-results.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}}
 
 // HTML exam bridge. Each HTML exam must implement the ASHRAF_IELTS_V1 protocol.
-let examFrame=null,examMode=null,examTest=null,examReview=null,examNonce=0;
+let examWindow=null,examMode=null,examTest=null,examReview=null,examNonce=0;
 const HTML_CHANNEL='ASHRAF_IELTS_V1';
-async function loadHtml(path){
- const objectRef=ref(storage,path);let firstError;
- try{const blob=await getBlob(objectRef);return await blob.text()}catch(err){firstError=err}
- // Some browsers cannot use Firebase SDK's blob retrieval. The download URL
- // is a fallback, not a direct navigation to Storage-hosted HTML.
- try{const url=await getDownloadURL(objectRef);const response=await fetch(url,{mode:'cors',cache:'no-store'});if(!response.ok)throw Error('HTTP '+response.status);return await response.text()}
- catch(err){throw Error('Could not load the uploaded HTML. Storage read: '+(firstError?.message||firstError)+'; URL fallback: '+(err?.message||err))}
-}
 async function previewHtml(id){let t=byId(id);if(!t?.resourcePath)return alert('No resource attached.');if(!/\.html?$/i.test(t.resourceName||''))return openResource(t.resourcePath);await launchHtmlTest(t,'preview')}
 async function reviewHtml(id){let t=byId(id),s=ownSub(id);if(!s?.reviewState)return alert('No saved answer review for this test.');await launchHtmlTest(t,'review',s.reviewState)}
 async function launchHtmlTest(t,mode,reviewState=null){
+ // Open synchronously during the click, before asynchronous Firebase operations.
+ // Do not use noopener: the exam must message its opener to save results.
+ const popup=window.open('','_blank');
+ if(!popup){alert('Your browser blocked the exam tab. Allow pop-ups for this website, then click Start Test again.');return}
  try{
+  popup.document.title='Opening IELTS examination';
+  popup.document.body.innerHTML='<p style="font:20px sans-serif;padding:32px">Opening IELTS examination…</p>';
   if(!t.resourcePath)throw Error('No HTML file attached.');
-  // Direct iframe navigation avoids cross-origin fetch/getBlob of large HTML files.
-  // A previously saved URL works even when Firebase Storage SDK reads time out.
   let url=t.resourceURL||'';
-  if(!url){try{url=await getDownloadURL(ref(storage,t.resourcePath))}catch(e){throw Error('Could not obtain the exam file link. Instructor: open Edit / Upload and paste the Firebase Storage file download URL in the new field. '+(e.message||e))}}
+  if(!url){try{url=await getDownloadURL(ref(storage,t.resourcePath))}catch(e){throw Error('Could not obtain the exam link. Instructor: enter its Firebase download URL under Edit / Upload. '+(e.message||e))}}
   if(!/^https:\/\/firebasestorage\.googleapis\.com\//i.test(url))throw Error('Invalid Firebase Storage file URL.');
-  clearInterval(timer);page='html-exam';render();
-  document.getElementById('content').innerHTML=`<div class="head"><h1>${esc(t.title)} — ${mode==='review'?'Answer Review':mode==='preview'?'Instructor Preview':'Exam'}</h1><button class="btn secondary" id="exitHtml">${mode==='take'?'Exit without submitting':'Back to tests'}</button></div><div class="notice">${mode==='preview'?'Instructor preview — no result will be recorded.':mode==='review'?'Read-only review of your submitted answers.':'After checking your answers, press Submit Final Result inside the HTML exam. Wait for the saved confirmation.'}</div><iframe id="htmlExamFrame" sandbox="allow-scripts allow-forms allow-modals allow-downloads" allow="fullscreen" allowfullscreen style="width:100%;height:78vh;border:1px solid #cbd5e1;border-radius:12px;background:white" title="IELTS HTML Exam"></iframe>`;
-  examFrame=document.getElementById('htmlExamFrame');examMode=mode;examTest=t;examReview=reviewState;const nonce=++examNonce;
-  examFrame.addEventListener('load',()=>{if(nonce!==examNonce)return;if(mode==='review')examFrame.contentWindow.postMessage({channel:HTML_CHANNEL,type:'review',reviewState},'*')});
-  examFrame.src=url;
-  document.getElementById('exitHtml').onclick=()=>{examNonce++;examFrame=null;examTest=null;examMode=null;page='tests';render()};
- }catch(e){message(e);page='tests';render()}
+  clearInterval(timer);
+  examWindow=popup;examMode=mode;examTest=t;examReview=reviewState;const nonce=++examNonce;
+  // A separate tab avoids iframe focus/fullscreen conflicts.
+  page='html-exam';render();
+  document.getElementById('content').innerHTML=`<div class="head"><h1>${esc(t.title)} — ${mode==='review'?'Answer Review':mode==='preview'?'Instructor Preview':'Exam'}</h1><button class="btn secondary" id="backToTests">Back to tests</button></div><div class="notice">The examination opened in a separate tab. Keep this IELTS Student Portal tab open until your result is saved. ${mode==='take'?'Submit Final Result inside the examination, then wait for the saved confirmation.':''}</div><button class="btn" id="returnToExam">Return to examination tab</button>`;
+  document.getElementById('returnToExam').onclick=()=>{if(!popup.closed)popup.focus();else alert('The examination tab is closed. Return to My Tests to reopen it.')};
+  document.getElementById('backToTests').onclick=()=>{page='tests';render()};
+  if(mode==='review')popup.addEventListener('load',()=>{if(nonce===examNonce&&!popup.closed)popup.postMessage({channel:HTML_CHANNEL,type:'review',reviewState},'https://firebasestorage.googleapis.com')});
+  popup.location.replace(url);
+ }catch(e){try{popup.close()}catch(_){}message(e);page='tests';render()}
 }
 window.addEventListener('message',async event=>{
- if(event.data?.channel!==HTML_CHANNEL||event.data.type!=='submit'||!examFrame||event.source!==examFrame.contentWindow)return;
+ if(event.data?.channel!==HTML_CHANNEL||event.data.type!=='submit'||!examWindow||event.source!==examWindow||event.origin!=='https://firebasestorage.googleapis.com')return;
  if(examMode!=='take'||!examTest||!current||isAdmin())return;
  const t=examTest,d=event.data,score=d.score,max=d.maxScore,band=d.band;
  if(!['Listening','Reading'].includes(t.cat)||!eligible(t)||ownSub(t.id))return;
- if(!Number.isInteger(score)||!Number.isInteger(max)||max<1||max>100||score<0||score>max||!Number.isFinite(band)||band<1||band>9||Math.round(band*2)!==band*2){event.source.postMessage({channel:HTML_CHANNEL,type:'error',message:'Invalid score or IELTS band.'},'*');return}
- if(busy)return;busy=true;
- const source=event.source;
+ if(!Number.isInteger(score)||!Number.isInteger(max)||max<1||max>100||score<0||score>max||!Number.isFinite(band)||band<1||band>9||Math.round(band*2)!==band*2){event.source.postMessage({channel:HTML_CHANNEL,type:'error',message:'Invalid score or IELTS band.'},event.origin);return}
+ if(busy)return;busy=true;const source=event.source;
  try{
-  // Fixed document ID and create-only write. Firestore rules must deny updates/deletes by students.
   const id=`${current.uid}_${t.id}`;
   const existing=await getDoc(doc(fs,'submissions',id));if(existing.exists())throw Error('This test has already been submitted.');
   const data={testId:t.id,userId:current.uid,date:new Date().toISOString(),status:'Completed',score,maxScore:max,band,feedback:'',response:'HTML exam',answers:[],reviewState:d.reviewState||null,source:'html-bridge'};
   await setDoc(doc(fs,'submissions',id),data);
-  source.postMessage({channel:HTML_CHANNEL,type:'saved'},'*');
+  source.postMessage({channel:HTML_CHANNEL,type:'saved'},event.origin);
   await refresh();
- }catch(e){source.postMessage({channel:HTML_CHANNEL,type:'error',message:e.message||String(e)},'*');message(e)}finally{busy=false}
+ }catch(e){source.postMessage({channel:HTML_CHANNEL,type:'error',message:e.message||String(e)},event.origin);message(e)}finally{busy=false}
 });
 
 onAuthStateChanged(auth,async user=>{current=user;profile=null;if(!user){clearInterval(timer);login();return}try{let snap=await getDoc(doc(fs,'users',user.uid));if(!snap.exists()||!snap.data().active){root.innerHTML='<div class="login"><div class="loginbox"><h2>Account not authorized</h2><p>Ask your instructor to activate your account in the IELTS Firebase project.</p><button id="exit" class="btn">Sign out</button></div></div>';document.getElementById('exit').onclick=()=>signOut(auth);return}profile=snap.data();await refresh();page='dashboard';render()}catch(e){root.innerHTML=`<div class="login"><div class="loginbox"><h2>Firebase connection error</h2><p class="error">${esc(e.message)}</p><button id="exit" class="btn">Sign out</button></div></div>`;document.getElementById('exit').onclick=()=>signOut(auth)}});login();
