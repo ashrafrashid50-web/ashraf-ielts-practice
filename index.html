@@ -44,10 +44,16 @@ function secureExamWarn(reason){
  if(Date.now()-examLastWarning<900)return;
  examLastWarning=Date.now();examWarningOpen=true;examWarningCount++;
  const count=document.getElementById('examSecurityCount');if(count)count.textContent='Security warnings: '+examWarningCount;
- alert('IELTS EXAM SECURITY WARNING #'+examWarningCount+'\n'+reason+'\nPlease return to the exam and fullscreen. You may continue; warnings do not submit your exam.');
- examWarningOpen=false;
+ const overlay=document.getElementById('examReturnOverlay');
+ if(overlay){overlay.querySelector('[data-reason]').textContent='Security warning #'+examWarningCount+': '+reason;overlay.style.display='flex';}
 }
-function examSecurityStop(){examSecurityActive=false;examWarningOpen=false}
+async function examReturnFullscreen(){
+ const overlay=document.getElementById('examReturnOverlay');
+ try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();
+   if(overlay)overlay.style.display='none';examWarningOpen=false;
+ }catch(e){if(overlay)overlay.querySelector('[data-reason]').textContent='Fullscreen was blocked. Click Return to Fullscreen again to continue.';}
+}
+function examSecurityStop(){examSecurityActive=false;examWarningOpen=false;const o=document.getElementById('examReturnOverlay');if(o)o.remove()}
 document.addEventListener('fullscreenchange',()=>{if(examSecurityActive&&!document.fullscreenElement)secureExamWarn('You left fullscreen mode.')});
 document.addEventListener('visibilitychange',()=>{if(examSecurityActive&&document.hidden)secureExamWarn('You switched away from the exam tab.')});
 window.addEventListener('blur',()=>{if(examSecurityActive&&!document.hidden)secureExamWarn('The exam window lost focus.')});
@@ -75,6 +81,13 @@ async function launchHtmlTest(t,mode,reviewState=null){
   if(!/^https:\/\/firebasestorage\.googleapis\.com\//i.test(url))throw Error('Invalid Firebase Storage file URL.');
   clearInterval(timer);examSecurityStop();examWarningCount=0;page='html-exam';render();
   document.getElementById('content').innerHTML=`<div class="head"><h1>${esc(t.title)} — ${mode==='review'?'Answer Review':mode==='preview'?'Instructor Preview':'Exam'}</h1><button class="btn secondary" id="exitHtml">${mode==='take'?'Exit without submitting':'Back to tests'}</button></div><div class="notice">${mode==='preview'?'Instructor preview — no result will be recorded.':mode==='review'?'Read-only review of your submitted answers.':'After checking your answers, press Submit Final Result inside the HTML exam. Wait for the saved confirmation.'}</div><iframe id="htmlExamFrame" sandbox="allow-scripts allow-forms allow-modals allow-downloads" allow="fullscreen" allowfullscreen style="width:100%;height:78vh;border:1px solid #cbd5e1;border-radius:12px;background:white" title="IELTS HTML Exam"></iframe>`;
+  if(mode==='take'){
+    const gate=document.createElement('div');gate.id='examReturnOverlay';gate.setAttribute('role','dialog');gate.setAttribute('aria-modal','true');
+    gate.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(9,22,43,.96);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:28px;text-align:center';
+    gate.innerHTML='<h2>IELTS Exam Security</h2><p data-reason>Click below to enter fullscreen and begin your examination.</p><p>Warnings are unlimited. Your answers will not be submitted because of a warning.</p><button type="button" id="examReturnButton" style="font-size:20px;padding:16px 28px;border:0;border-radius:12px;background:#f9c74f;color:#17263c;font-weight:bold;cursor:pointer">Return to Fullscreen / Continue</button>';
+    document.body.appendChild(gate);
+    document.getElementById('examReturnButton').onclick=async()=>{examSecurityActive=true;await examReturnFullscreen()};
+  }
   examFrame=document.getElementById('htmlExamFrame');examMode=mode;examTest=t;examReview=reviewState;const nonce=++examNonce;
   examFrame.addEventListener('load',()=>{if(nonce!==examNonce)return;if(mode==='review')examFrame.contentWindow.postMessage({channel:HTML_CHANNEL,type:'review',reviewState},'*')});
   examFrame.src=url;
