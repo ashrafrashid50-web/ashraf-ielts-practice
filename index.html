@@ -81,7 +81,24 @@ function reportsPage(){document.getElementById('content').innerHTML=`<div class=
 let examWindow=null,examMode=null,examTest=null,examReview=null,examNonce=0;
 const HTML_CHANNEL='ASHRAF_IELTS_V1';
 async function previewHtml(id){let t=byId(id);if(!t?.resourcePath)return alert('No resource attached.');if(!/\.html?$/i.test(t.resourceName||''))return openResource(t.resourcePath);if(isWritingTest(t))return launchWritingTest(t,'preview');await launchHtmlTest(t,'preview')}
-async function reviewHtml(id){let t=byId(id),s=ownSub(id);if(!s?.reviewState)return alert('No saved answer review for this test.');await launchHtmlTest(t,'review',s.reviewState)}
+async function reviewHtml(id){let t=byId(id),s=ownSub(id);if(!s?.reviewState)return alert('No saved answer review for this test.');await launchReviewFrame(t,s.reviewState)}
+// Answer review opens inside the portal page: the frame's load event tells us exactly when the exam is ready,
+// so the saved answers are sent once and the exam shows them locked (works with existing exam files).
+async function launchReviewFrame(t,reviewState){
+ try{
+  if(!t.resourcePath)throw Error('No HTML file attached.');
+  let url=t.resourceURL||'';
+  if(!url)url=await getDownloadURL(ref(storage,t.resourcePath));
+  if(!/^https:\/\/firebasestorage\.googleapis\.com\//i.test(url))throw Error('Invalid Firebase Storage file URL.');
+  clearInterval(timer);page='html-exam';render();
+  document.getElementById('content').innerHTML=`<div class="head"><h1>${esc(t.title)} — Answer Review</h1><button class="btn secondary" id="backToTests">Back to tests</button></div><div style="position:relative"><iframe id="reviewFrame" src="${esc(url)}" allow="fullscreen; autoplay" allowfullscreen style="width:100%;height:80vh;border:1px solid #d6deea;border-radius:12px;background:#fff"></iframe><div id="reviewCover" style="position:absolute;inset:0;background:#f3f6fc;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:650;color:#24436b">Loading your answers…</div></div>`;
+  const fr=document.getElementById('reviewFrame');
+  examWindow=fr.contentWindow;examMode='review';examTest=t;examReview=reviewState;const nonce=++examNonce;
+  fr.addEventListener('load',()=>{if(nonce!==examNonce)return;try{fr.contentWindow.postMessage({channel:HTML_CHANNEL,type:'review',reviewState},'https://firebasestorage.googleapis.com')}catch(_){}
+   setTimeout(()=>document.getElementById('reviewCover')?.remove(),500)},{once:true});
+  document.getElementById('backToTests').onclick=()=>{examWindow=null;page='tests';render()};
+ }catch(e){message(e);page='tests';render()}
+}
 async function launchHtmlTest(t,mode,reviewState=null){
  // Open synchronously during the click, before asynchronous Firebase operations.
  // Do not use noopener: the exam must message its opener to save results.
