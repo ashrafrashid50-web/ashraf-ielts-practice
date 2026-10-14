@@ -158,6 +158,13 @@ details.more .menu button:disabled{opacity:.4}
 .num{text-align:center}
 @media(max-width:1000px){.tiles{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:700px){.tiles{grid-template-columns:repeat(2,1fr)}.librow{flex-direction:column;align-items:flex-start}.toolbar .field.narrow{flex:1}}
+
+/* ===== Fresh green page background ===== */
+:root,body,.shell.teacher-theme,.shell.student-theme{background:#d8ebdd}
+.shell .top{background:#ebf5ee;border-bottom-color:#c2dbc9}
+.shell .card,.shell .sectioncard,.shell .tile,.shell .chip{border-color:#c2dbc9}
+.shell .tile.overall{border-color:#0b3d2e}.shell .chip.on{border-color:#0f7b55}
+.shell .librow,.shell .attnrow{border-bottom-color:#c2dbc9}
 </style></head><body><div id="app"></div><script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js';
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,createUserWithEmailAndPassword} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js';
