@@ -5,8 +5,8 @@ Where to paste:
 1. Open https://console.firebase.google.com and choose the project "ashraf-ielts-practice".
 2. Go to Firestore Database -> Rules.
 3. Find the line:   match /databases/{database}/documents {
-4. Paste everything between the two dashed lines just BELOW that line
-   (inside it, next to your other "match" blocks). Do not delete your existing rules.
+4. Paste everything between the two dashed lines after your last "match" block
+   (just before the two closing braces at the end). Do not delete your existing rules.
 5. Click Publish, then refresh your portal.
 
 What these rules do:
@@ -16,38 +16,23 @@ What these rules do:
 - Only you (the admin) can arrange, edit, cancel or delete classes.
 
 ------------------------------------------------------------------------
-    // ===== Live classes =====
-    function liveUser() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-    }
-    function liveIsAdmin() {
-      return request.auth != null
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && liveUser().role == 'admin';
-    }
-    function liveIsActive() {
-      return request.auth != null
-        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && liveUser().active == true;
-    }
-
+    // ---------- live classes ----------
+    // (Uses the isAdmin() and isActive() helpers already in your rules.)
+    // Students request a lesson; only the instructor arranges it.
     match /liveRequests/{id} {
-      allow read: if liveIsAdmin()
-        || (request.auth != null && resource.data.userId == request.auth.uid);
-      allow create: if liveIsActive()
+      allow read: if isAdmin() || (isActive() && resource.data.userId == request.auth.uid);
+      allow create: if isActive()
+        && !isAdmin()
         && request.resource.data.userId == request.auth.uid
         && request.resource.data.status == 'open';
-      allow update: if liveIsAdmin();
-      allow delete: if liveIsAdmin()
-        || (request.auth != null
-            && resource.data.userId == request.auth.uid
-            && resource.data.status == 'open');
+      allow update: if isAdmin();
+      allow delete: if isAdmin()
+        || (isActive() && resource.data.userId == request.auth.uid && resource.data.status == 'open');
     }
 
+    // One copy of each class per invited student (time, meeting link, code).
     match /liveSessions/{id} {
-      allow read: if liveIsAdmin()
-        || (liveIsActive() && resource.data.userId == request.auth.uid);
-      allow write: if liveIsAdmin();
+      allow read: if isAdmin() || (isActive() && resource.data.userId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
     }
-    // ===== End of live classes =====
 ------------------------------------------------------------------------
