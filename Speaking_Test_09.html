@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IELTS Speaking – Sample Test 1</title>
+<style>
+:root{--navy:#1a3a5c;--blue:#2b6cb0;--pale:#f2f6fb;--line:#d5e0ec;--ink:#1f2933;--muted:#5a6878;--red:#c0392b;--green:#1f8a4c;--amber:#b7791f}
+*{box-sizing:border-box}
+html,body{margin:0;background:#eef2f7;color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button{font:inherit;cursor:pointer}
+header{position:sticky;top:0;z-index:5;background:var(--navy);color:#fff}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 22px;max-width:1100px;margin:auto}
+.bar h1{font-size:17px;margin:0;font-weight:700}
+.bar .right{display:flex;gap:10px;align-items:center;font-size:14px}
+.steps{display:flex;gap:4px;max-width:1100px;margin:auto;padding:0 22px}
+.steps div{padding:9px 14px;font-size:14px;color:#a9bdd3;border-bottom:3px solid transparent;font-weight:600}
+.steps div.on{color:#fff;border-color:#63b3ed}
+.steps div.done{color:#d6e6f5}
+.steps div.done::after{content:" ✓";color:#68d391}
+main{max-width:860px;margin:26px auto 60px;padding:0 16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px 26px;margin-bottom:18px;box-shadow:0 1px 3px rgba(20,40,70,.05)}
+h2{color:var(--navy);margin:0 0 6px;font-size:22px}
+h3{color:var(--blue);margin:18px 0 8px;font-size:17px}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.btn{border:0;border-radius:10px;padding:11px 18px;background:var(--blue);color:#fff;font-weight:650;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{filter:brightness(1.07)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btn.sec{background:#e6edf5;color:var(--navy)}
+.btn.rec{background:var(--red)}
+.btn.green{background:var(--green)}
+.btn.big{padding:14px 24px;font-size:17px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{justify-content:space-between}
+.notice{background:#eaf4ff;border-left:4px solid #3384e4;padding:12px 14px;border-radius:8px;margin:12px 0}
+.warn{background:#fff6e5;border-left:4px solid var(--amber);padding:12px 14px;border-radius:8px;margin:12px 0}
+.err{background:#fdecea;border-left:4px solid var(--red);padding:12px 14px;border-radius:8px;margin:12px 0}
+.ok{background:#e8f6ee;border-left:4px solid var(--green);padding:12px 14px;border-radius:8px;margin:12px 0}
+.qbox{background:var(--pale);border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:12px;padding:18px 20px;margin:14px 0}
+.qmeta{font-size:13px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.04em}
+.qtext{font-size:21px;font-weight:650;color:var(--navy);margin-top:4px}
+.cue{background:#fffdf4;border:2px solid #e8dcaa;border-radius:12px;padding:20px 24px;margin:12px 0}
+.cue .t{font-size:19px;font-weight:700;color:var(--navy)}
+.cue ul{margin:6px 0 4px;padding-left:22px}
+.recpanel{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px}
+.timer{font-variant-numeric:tabular-nums;font-size:22px;font-weight:700;color:var(--navy);min-width:110px}
+.timer.live{color:var(--red)}
+.meter{flex:1;min-width:140px;height:10px;background:#e3e9f1;border-radius:6px;overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#48bb78,#ecc94b,#e53e3e);transition:width .08s}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--red);display:inline-block;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.25}}
+audio{width:100%;max-width:520px;height:40px}
+.prog{height:6px;background:#e3e9f1;border-radius:4px;overflow:hidden;margin:6px 0 2px}
+.prog i{display:block;height:100%;background:var(--blue);width:0;transition:width .3s}
+textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:10px;padding:12px;font:15px/1.5 inherit;resize:vertical}
+.list{border-top:1px solid var(--line)}
+.item{padding:12px 0;border-bottom:1px solid var(--line)}
+.item b{color:var(--navy)}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:20px;background:#e6edf5;color:var(--navy);margin-right:6px}
+.pill.miss{background:#fdecea;color:var(--red)}
+.big-count{font-size:56px;font-weight:800;color:var(--navy);font-variant-numeric:tabular-nums;line-height:1}
+.hidden{display:none!important}
+#splash{position:fixed;inset:0;z-index:20;background:linear-gradient(135deg,#1a3a5c,#2b6cb0);display:flex;align-items:center;justify-content:center;padding:16px}
+#splash .box{background:#fff;border-radius:18px;max-width:560px;width:100%;padding:34px 32px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+#splash h1{color:var(--navy);margin:6px 0 4px;font-size:28px}
+@media (max-width:600px){.qtext{font-size:18px}.card{padding:18px}.steps div{padding:8px 8px;font-size:13px}}
+</style>
+</head>
+<body>
+
+<div id="splash"><div class="box">
+  <div class="muted small" style="letter-spacing:.12em;font-weight:700">ASHRAF IELTS PRACTICE</div>
+  <h1 id="spTitle">IELTS Speaking</h1>
+  <div class="muted" id="spSub">Part 1 • Part 2 • Part 3</div>
+  <div class="notice" style="text-align:left;margin-top:22px">You will record your answers to every question. Use headphones if you can, sit somewhere quiet, and allow microphone access when your browser asks.</div>
+  <button class="btn big" id="startBtn">Start the speaking test</button>
+</div></div>
+
+<header>
+  <div class="bar"><h1 id="hdTitle">IELTS Speaking</h1>
+    <div class="right"><label class="small" style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="voiceOn" checked> Read questions aloud</label>
+    <button class="btn sec" id="fsBtn" style="padding:6px 12px;font-size:14px">⛶ Fullscreen</button></div></div>
+  <div class="steps" id="steps"></div>
+</header>
+
+<main id="main"></main>
+
+<script>
+/* ============================================================
+   TEST CONTENT — edit this block to make a new speaking test.
+   ============================================================ */
+const TEST = {
+  title: "IELTS Speaking – Test 9",
+  part1: {
+    maxSeconds: 45,
+    topics: [
+      { name: "Work or studies", questions: [
+        "Do you work or are you a student?",
+        "What do you study / what is your job?",
+        "Why did you choose that subject / job?" ] },
+      { name: "The city you live in", questions: [
+        "Which city do you live in now?",
+        "How long have you lived there?",
+        "Has the city changed much since you moved there?",
+        "Is it a friendly city?",
+        "Is it a good place for children and older people?",
+        "Would you recommend your city to visitors?" ] },
+      { name: "Computers and tablets", questions: [
+        "Do you prefer using a computer or a tablet?",
+        "When did you first use a computer?",
+        "Could you live without a computer?",
+        "When is it difficult to use a computer?" ] }
+    ]
+  },
+  part2: {
+    prepSeconds: 60, maxSeconds: 120, minSeconds: 60,
+    title: "Describe a challenging technological problem you faced.",
+    bullets: ["what the problem was", "when it happened", "how you dealt with it"],
+    explain: "and explain how you felt about it."
+  },
+  part3: {
+    maxSeconds: 90,
+    theme: "Technology and artificial intelligence",
+    questions: [
+      "What are the benefits and risks of artificial intelligence?",
+      "Are people becoming too dependent on AI?",
+      "Should children learn about AI at school?",
+      "How has technology changed the way we solve problems?" ]
+  }
+};
+/* ============================================================ */
+
+const CHANNEL = 'ASHRAF_IELTS_V1';
+const PORTAL_ORIGIN = '*'; // the portal validates the sender; replies are accepted only from the portal window
+// The portal shows this test inside its own page (iframe); older links open it in a new tab (opener).
+const portal = () => (window.parent !== window ? window.parent : (window.opener && !window.opener.closed ? window.opener : null));
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const mins = s => s%60===0 ? `${s/60} minute${s>60?'s':''}` : `${s} seconds`;
+const fmt = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+
+// Build the flat question list
+const Q = [];
+TEST.part1.topics.forEach(t => t.questions.forEach(q => Q.push({part:1, topic:t.name, text:q, max:TEST.part1.maxSeconds})));
+Q.push({part:2, topic:'Long turn', text:TEST.part2.title, max:TEST.part2.maxSeconds, cue:true});
+TEST.part3.questions.forEach(q => Q.push({part:3, topic:TEST.part3.theme, text:q, max:TEST.part3.maxSeconds}));
+Q.forEach((q,i) => { q.id = `p${q.part}q${Q.filter((x,j)=>j<i && x.part===q.part).length+1}`; });
+
+const S = { step:0, idx:{1:0,3:0}, rec:{}, notes:'', locked:false, prepDone:false };
+let stream=null, actx=null, analyser=null, mediaRec=null, chunks=[], tickTimer=null, levelRAF=null, recStart=0, recQ=null, prepTimer=null;
+const STEPS = ['Microphone check','Part 1','Part 2','Part 3','Finish'];
+
+document.title = TEST.title; $('#spTitle').textContent = TEST.title; $('#hdTitle').textContent = TEST.title;
+
+/* ---------- recording helpers ---------- */
+function pickMime(){
+  const c = ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];
+  for (const m of c) if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) return m;
+  return '';
+}
+async function getMic(){
+  if (stream) return stream;
+  if (!navigator.mediaDevices?.getUserMedia) throw Error('This browser cannot record audio. Please use an up-to-date Chrome, Edge, Firefox or Safari.');
+  stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+  actx = new (window.AudioContext||window.webkitAudioContext)();
+  const src = actx.createMediaStreamSource(stream); analyser = actx.createAnalyser(); analyser.fftSize = 512; src.connect(analyser);
+  return stream;
+}
+function level(el){
+  cancelAnimationFrame(levelRAF);
+  const buf = new Uint8Array(analyser.fftSize);
+  const loop = () => { analyser.getByteTimeDomainData(buf); let m=0; for (const v of buf) m=Math.max(m,Math.abs(v-128));
+    if (el && document.body.contains(el)) { el.style.width = Math.min(100, m/128*260)+'%'; levelRAF = requestAnimationFrame(loop); } };
+  loop();
+}
+function startRec(key, max, ui){
+  return new Promise(async (resolve, reject) => {
+    try { await getMic(); if (actx.state==='suspended') await actx.resume(); } catch(e){ reject(e); return; }
+    const mime = pickMime(); chunks = [];
+    try { mediaRec = new MediaRecorder(stream, mime ? {mimeType:mime, audioBitsPerSecond:48000} : undefined); }
+    catch(e){ mediaRec = new MediaRecorder(stream); }
+    recQ = key; recStart = performance.now();
+    mediaRec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+    mediaRec.onstop = () => {
+      clearInterval(tickTimer); cancelAnimationFrame(levelRAF);
+      const secs = Math.round((performance.now()-recStart)/100)/10;
+      const blob = new Blob(chunks, {type: (mediaRec.mimeType||mime||'audio/webm').split(';')[0]});
+      if (S.rec[key]?.url) URL.revokeObjectURL(S.rec[key].url);
+      S.rec[key] = {blob, url:URL.createObjectURL(blob), secs, mime:blob.type};
+      recQ = null; mediaRec = null; resolve(S.rec[key]);
+    };
+    mediaRec.start(1000);
+    if (ui?.meter) level(ui.meter);
+    tickTimer = setInterval(() => {
+      const s = (performance.now()-recStart)/1000;
+      if (ui?.timer) ui.timer.textContent = fmt(s) + ' / ' + fmt(max);
+      if (ui?.onTick) ui.onTick(s);
+      if (s >= max) stopRec();
+    }, 200);
+  });
+}
+function stopRec(){ if (mediaRec && mediaRec.state !== 'inactive') mediaRec.stop(); }
+
+/* ---------- examiner voice ---------- */
+let voice=null;
+function loadVoice(){ const v = speechSynthesis.getVoices(); voice = v.find(x=>/en-GB/i.test(x.lang)&&/female|libby|sonia|serena|kate|google uk english female/i.test(x.name)) || v.find(x=>/en-GB/i.test(x.lang)) || v.find(x=>/^en/i.test(x.lang)) || null; }
+if ('speechSynthesis' in window){ loadVoice(); speechSynthesis.onvoiceschanged = loadVoice; }
+function say(text){
+  return new Promise(res => {
+    if (!('speechSynthesis' in window) || !$('#voiceOn').checked) return res();
+    speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); if (voice) u.voice = voice; u.rate = 0.95;
+    u.onend = u.onerror = () => res(); speechSynthesis.speak(u); setTimeout(res, 15000);
+  });
+}
+
+/* ---------- navigation ---------- */
+function renderSteps(){
+  $('#steps').innerHTML = STEPS.map((s,i)=>`<div class="${i===S.step?'on':i<S.step?'done':''}">${s}</div>`).join('');
+}
+function go(step){ if (recQ) return; clearInterval(prepTimer); speechSynthesis?.cancel?.(); S.step = step; renderSteps(); window.scrollTo(0,0); [micPage,partPage.bind(null,1),part2Page,partPage.bind(null,3),finishPage][step](); }
+window.addEventListener('beforeunload', e => { if (!S.locked && Object.keys(S.rec).length) { e.preventDefault(); e.returnValue=''; } });
+
+/* ---------- Step 0: microphone check ---------- */
+function micPage(){
+  $('#main').innerHTML = `<div class="card"><h2>Microphone check</h2>
+  <p class="muted">Before you begin, make sure your microphone works. Press <b>Test microphone</b>, say a sentence such as “My name is … and I am ready for my speaking test”, then listen to the recording.</p>
+  <div class="recpanel"><button class="btn rec" id="mt">● Test microphone (5 seconds)</button><div class="meter"><i id="mm"></i></div><span class="timer" id="mtime">0:00</span></div>
+  <div id="mplay" style="margin-top:12px"></div><div id="mmsg"></div></div>
+  <div class="card"><h2>How this test works</h2>
+  <ul><li><b>Part 1</b> (${Q.filter(q=>q.part===1).length} questions): short answers about you. Up to ${TEST.part1.maxSeconds} seconds each.</li>
+  <li><b>Part 2</b>: ${mins(TEST.part2.prepSeconds)} preparation with notes, then speak for 1–2 minutes. Recording stops at ${fmt(TEST.part2.maxSeconds)}.</li>
+  <li><b>Part 3</b> (${TEST.part3.questions.length} questions): longer discussion answers. Up to ${TEST.part3.maxSeconds} seconds each.</li></ul>
+  <p class="muted small">Each question is read aloud (you can switch this off at the top). Press <b>Record</b>, answer, then press <b>Stop</b>. You can record an answer again before you move on, but you cannot go back to earlier questions.</p>
+  <div class="row spread"><span></span><button class="btn big" id="toP1" disabled>Begin Part 1 →</button></div></div>`;
+  $('#mt').onclick = async () => {
+    $('#mmsg').innerHTML=''; $('#mt').disabled = true;
+    try { const r = await startRec('mic', 5, {meter:$('#mm'), timer:$('#mtime')});
+      $('#mplay').innerHTML = `<audio controls src="${r.url}"></audio>`;
+      $('#mmsg').innerHTML = `<div class="ok">Recording works. If you can hear yourself clearly, begin Part 1.</div>`;
+      $('#toP1').disabled = false; delete S.rec.mic;
+    } catch(e){ $('#mmsg').innerHTML = `<div class="err"><b>Microphone not available.</b> ${esc(e.message||e)}<br>Allow microphone access in your browser (the icon in the address bar), then try again.</div>`; }
+    $('#mt').disabled = false;
+  };
+  $('#toP1').onclick = () => go(1);
+}
+
+/* ---------- Parts 1 and 3 ---------- */
+function partPage(part){
+  const qs = Q.filter(q=>q.part===part), i = S.idx[part], q = qs[i];
+  const intro = part===1 ? 'The examiner asks you about yourself and familiar topics.' : `Discussion topic: <b>${esc(TEST.part3.theme)}</b>. Give full answers with reasons and examples.`;
+  $('#main').innerHTML = `<div class="card"><div class="row spread"><h2>Part ${part}</h2><span class="muted small">Question ${i+1} of ${qs.length}</span></div>
+  <div class="prog"><i style="width:${(i)/qs.length*100}%"></i></div><p class="muted small" style="margin-top:6px">${intro}</p>
+  <div class="qbox"><div class="qmeta">${esc(q.topic)}</div><div class="qtext">${esc(q.text)}</div></div>
+  <div class="row"><button class="btn sec" id="hear">🔊 Hear the question again</button></div>
+  ${recBlock(q)}
+  <div class="row spread" style="margin-top:18px"><span class="muted small">Answers save automatically in this tab until you submit.</span>
+  <button class="btn" id="next" ${S.rec[q.id]?'':'disabled'}>${i===qs.length-1 ? (part===1?'Finish Part 1 → Part 2':'Finish Part 3 → Review & submit') : 'Next question →'}</button></div></div>`;
+  wireRec(q);
+  $('#hear').onclick = () => say(q.text);
+  $('#next').onclick = () => { if (recQ) return; if (i < qs.length-1){ S.idx[part]++; partPage(part); } else go(part===1?2:4); };
+  if (!S.rec[q.id]) setTimeout(()=>say(q.text), 250);
+}
+function recBlock(q){
+  const r = S.rec[q.id];
+  return `<div class="recpanel" id="rp">
+    <button class="btn rec" id="recBtn">${r?'● Record again':'● Start recording'}</button>
+    <button class="btn sec hidden" id="stopBtn">■ Stop</button>
+    <span class="timer" id="tm">${r?fmt(r.secs):'0:00'} / ${fmt(q.max)}</span><div class="meter"><i id="lv"></i></div></div>
+    <div id="hint" class="muted small" style="margin-top:6px">${q.cue?`Speak for at least ${mins(TEST.part2.minSeconds)}. Recording stops automatically at ${fmt(q.max)}.`:`Recording stops automatically after ${q.max} seconds.`}</div>
+    <div id="play" style="margin-top:10px">${r?`<audio controls src="${r.url}"></audio>`:''}</div>`;
+}
+function wireRec(q, onDone){
+  const rb=$('#recBtn'), sb=$('#stopBtn');
+  rb.onclick = async () => {
+    if (S.rec[q.id] && !confirm('Record this answer again? Your previous recording for this question will be replaced.')) return;
+    speechSynthesis?.cancel?.();
+    rb.classList.add('hidden'); sb.classList.remove('hidden'); $('#tm').classList.add('live'); $('#play').innerHTML='<span class="dot"></span> <b style="color:var(--red)">Recording…</b>';
+    const nx=$('#next'); if (nx) nx.disabled = true;
+    try{
+      const r = await startRec(q.id, q.max, {meter:$('#lv'), timer:$('#tm'), onTick:s=>{ if(q.cue){ $('#hint').innerHTML = s<TEST.part2.minSeconds ? `Keep talking – at least ${fmt(TEST.part2.minSeconds - s)} more.` : `<span style="color:var(--green)">Good – you can stop any time before ${fmt(q.max)}.</span>`; } }});
+      $('#tm').classList.remove('live'); sb.classList.add('hidden'); rb.classList.remove('hidden'); rb.textContent='● Record again';
+      $('#play').innerHTML = `<audio controls src="${r.url}"></audio>` + (r.secs < 3 ? '<div class="warn">This recording is very short. You may want to record again.</div>' : '');
+      if (nx) nx.disabled = false; if (onDone) onDone(r);
+    } catch(e){ sb.classList.add('hidden'); rb.classList.remove('hidden'); $('#play').innerHTML = `<div class="err">${esc(e.message||e)}</div>`; }
+  };
+  sb.onclick = () => stopRec();
+}
+
+/* ---------- Part 2 ---------- */
+function part2Page(){
+  const q = Q.find(x=>x.part===2), c = TEST.part2;
+  const cue = `<div class="cue"><div class="t">${esc(c.title)}</div><div style="margin-top:8px"><i>You should say:</i><ul>${c.bullets.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>${esc(c.explain)}</div></div>`;
+  if (!S.prepDone){
+    $('#main').innerHTML = `<div class="card"><h2>Part 2 – Long turn</h2>
+    <p class="muted">You will have <b>${mins(c.prepSeconds)}</b> to prepare. You can write notes below. Then you will talk for <b>1 to 2 minutes</b>. Recording starts automatically when the preparation time ends.</p>
+    ${cue}
+    <div class="row spread" style="margin:14px 0 6px"><b>Your notes</b><span class="muted small">Notes are sent to your teacher with your recording.</span></div>
+    <textarea id="notes" placeholder="Key words only…">${esc(S.notes)}</textarea>
+    <div class="row spread" style="margin-top:14px"><div><div class="muted small">Preparation time</div><div class="big-count" id="pc">${fmt(c.prepSeconds)}</div></div>
+    <div class="row"><button class="btn" id="prepGo">Start preparation</button><button class="btn sec hidden" id="ready">I'm ready – start speaking</button></div></div></div>`;
+    $('#notes').oninput = e => S.notes = e.target.value;
+    $('#prepGo').onclick = () => {
+      $('#prepGo').classList.add('hidden'); $('#ready').classList.remove('hidden'); $('#notes').focus();
+      let left = c.prepSeconds; const end = Date.now()+left*1000;
+      prepTimer = setInterval(() => { left = Math.max(0, Math.ceil((end-Date.now())/1000)); $('#pc').textContent = fmt(left); if (left<=10) $('#pc').style.color='var(--red)'; if (left===0) beginTalk(); }, 250);
+      say('You have one minute to prepare. You can make some notes.');
+    };
+    $('#ready').onclick = beginTalk;
+    return;
+  }
+  talkView(cue, q);
+}
+function beginTalk(){
+  clearInterval(prepTimer); S.prepDone = true;
+  const q = Q.find(x=>x.part===2), c = TEST.part2;
+  const cue = `<div class="cue"><div class="t">${esc(c.title)}</div><div style="margin-top:8px"><i>You should say:</i><ul>${c.bullets.map(b=>`<li>${esc(b)}</li>`).join('')}</ul>${esc(c.explain)}</div></div>`;
+  talkView(cue, q, true);
+}
+function talkView(cue, q, autostart){
+  $('#main').innerHTML = `<div class="card"><h2>Part 2 – Long turn</h2>${cue}
+  ${S.notes.trim()?`<details style="margin:8px 0"><summary class="small" style="cursor:pointer;color:var(--blue);font-weight:650">Show my notes</summary><div style="white-space:pre-wrap;background:var(--pale);padding:10px;border-radius:8px;margin-top:6px">${esc(S.notes)}</div></details>`:''}
+  ${recBlock(q)}
+  <div class="row spread" style="margin-top:18px"><span class="muted small">When you finish, press Stop.</span><button class="btn" id="next" ${S.rec[q.id]?'':'disabled'}>Finish Part 2 → Part 3</button></div></div>`;
+  wireRec(q);
+  $('#next').onclick = () => { if (!recQ) go(3); };
+  if (autostart && !S.rec[q.id]) say('Now please start speaking. You have one to two minutes.').then(()=>{ if(!recQ && !S.rec[q.id]) $('#recBtn').click(); });
+}
+
+/* ---------- Finish & submit ---------- */
+function finishPage(){
+  const missing = Q.filter(q=>!S.rec[q.id]);
+  const total = Object.values(S.rec).reduce((a,r)=>a+r.secs,0);
+  $('#main').innerHTML = `<div class="card"><h2>Review and submit</h2>
+  <p class="muted">You recorded <b>${Q.length-missing.length} of ${Q.length}</b> answers (${fmt(total)} in total). Listen to them if you wish, then submit them to your teacher.</p>
+  ${missing.length?`<div class="warn">${missing.length} question(s) have no recording. You can still submit.</div>`:''}
+  <div id="sendMsg"></div>
+  <div class="row"><button class="btn big green" id="submit" ${S.locked?'disabled':''}>${S.locked?'✓ Submitted':'Submit to Ashraf IELTS'}</button></div>
+  <div class="prog hidden" id="up"><i></i></div></div>
+  <div class="card"><h2>Your answers</h2>${[1,2,3].map(p=>`<h3>Part ${p}</h3><div class="list">${Q.filter(q=>q.part===p).map(q=>{const r=S.rec[q.id];return `<div class="item"><span class="pill ${r?'':'miss'}">${r?fmt(r.secs):'Not recorded'}</span><b>${esc(q.text)}</b>${r?`<div style="margin-top:6px"><audio controls preload="none" src="${r.url}"></audio></div>`:''}</div>`}).join('')}</div>${p===2&&S.notes.trim()?`<div class="small muted" style="margin-top:6px"><b>Notes:</b> ${esc(S.notes)}</div>`:''}`).join('')}</div>`;
+  $('#submit').onclick = submit;
+  if (!portal()) $('#sendMsg').innerHTML = `<div class="warn">This test was not opened from the Ashraf IELTS portal, so it cannot be submitted. <button class="btn sec" id="dl" style="padding:6px 12px">Download my recordings</button></div>`;
+  if ($('#dl')) $('#dl').onclick = downloadAll;
+}
+let waitTimer=null;
+function submit(){
+  if (S.locked) return;
+  if (!portal()){ $('#sendMsg').innerHTML = `<div class="err"><b>This test is not connected to the Ashraf IELTS portal</b>, so it cannot be submitted from here. Your recordings are safe in this tab. <button class="btn sec" id="dl2" style="padding:6px 12px">Download my recordings</button></div>`; $('#dl2').onclick = downloadAll; return; }
+  const recs = Q.filter(q=>S.rec[q.id]).map(q=>({id:q.id, part:q.part, topic:q.topic, question:q.text, seconds:S.rec[q.id].secs, mime:S.rec[q.id].mime, blob:S.rec[q.id].blob}));
+  if (!recs.length){ $('#sendMsg').innerHTML = `<div class="err">There are no recordings to submit.</div>`; return; }
+  if (!confirm('Submit your speaking test now? You cannot change your answers after submitting.')) return;
+  $('#submit').disabled = true; $('#up').classList.remove('hidden');
+  $('#sendMsg').innerHTML = `<div class="notice">Uploading your recordings… keep this tab and the portal tab open.</div>`;
+  portal().postMessage({channel:CHANNEL, type:'speaking_submit', title:TEST.title, notes:S.notes, recordings:recs, totalQuestions:Q.length}, PORTAL_ORIGIN);
+  clearTimeout(waitTimer);
+  waitTimer = setTimeout(() => { if (!S.locked){ $('#sendMsg').innerHTML = `<div class="err">No reply from the portal. Check that the portal tab is still open and you are signed in, then press Submit again.</div>`; $('#submit').disabled=false; } }, 120000);
+}
+window.addEventListener('message', e => {
+  const d = e.data; if (!d || d.channel !== CHANNEL || e.source !== portal()) return;
+  if (d.type === 'progress'){ $('#up i') && ($('#up i').style.width = Math.round(d.done/d.total*100)+'%'); $('#sendMsg').innerHTML = `<div class="notice">Uploading recording ${d.done} of ${d.total}…</div>`; }
+  if (d.type === 'saved'){ clearTimeout(waitTimer); S.locked = true; $('#up') && $('#up').classList.add('hidden'); $('#submit').textContent='✓ Submitted'; $('#submit').disabled=true;
+    $('#sendMsg').innerHTML = `<div class="ok"><b>Your speaking test has been submitted.</b> Your teacher will listen to your answers and send feedback in the portal (My Results). You can now leave this test.</div>`; }
+  if (d.type === 'error'){ clearTimeout(waitTimer); $('#sendMsg').innerHTML = `<div class="err"><b>Not submitted:</b> ${esc(d.message||'Unknown error')} <button class="btn sec" id="dl3" style="padding:6px 12px">Download my recordings</button></div>`; $('#dl3').onclick = downloadAll; $('#submit').disabled = !!d.final; }
+});
+function downloadAll(){
+  Q.forEach(q => { const r = S.rec[q.id]; if (!r) return; const a = document.createElement('a'); a.href = r.url; a.download = `${q.id}.${/mp4/.test(r.mime)?'m4a':/ogg/.test(r.mime)?'ogg':'webm'}`; document.body.appendChild(a); a.click(); a.remove(); });
+}
+
+/* ---------- start ---------- */
+$('#fsBtn').onclick = () => { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(()=>{}); else document.exitFullscreen?.(); };
+$('#startBtn').onclick = () => { $('#splash').remove(); document.documentElement.requestFullscreen?.().catch(()=>{}); go(0); };
+renderSteps();
+window.__speakingSelfTest = { Q, S, TEST, go };
+</script>
+</body>
+</html>
