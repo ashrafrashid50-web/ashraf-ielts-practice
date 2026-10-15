@@ -165,6 +165,25 @@ details.more .menu button:disabled{opacity:.4}
 .shell .card,.shell .sectioncard,.shell .tile,.shell .chip{border-color:#c2dbc9}
 .shell .tile.overall{border-color:#0b3d2e}.shell .chip.on{border-color:#0f7b55}
 .shell .librow,.shell .attnrow{border-bottom-color:#c2dbc9}
+
+/* ===== Live classes ===== */
+a.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none}
+.navcount{margin-left:auto;min-width:20px;padding:1px 7px;border-radius:12px;background:#d9b66a;color:#062a1f;font-size:11.5px;font-weight:800;text-align:center}
+.nav span{display:flex;align-items:center;gap:8px;flex:1}
+.livecode{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;font-weight:800;letter-spacing:.06em;background:#eef3ee;border:1px dashed #9cc4ad;border-radius:7px;padding:2px 9px;color:#0b3d2e}
+.liverow{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #c2dbc9;flex-wrap:wrap}
+.liverow:last-child{border-bottom:0}
+.liverow .when{font-size:15px;font-weight:700;color:#0b3d2e}
+.liverow .meta{font-size:12.5px;color:#6e7b71;margin-top:4px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.liverow .acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn.join{background:#0b8a63!important;padding:11px 18px;font-size:15px}
+.reqnote{background:#f7f0e1;border-radius:8px;padding:8px 10px;margin-top:6px;font-size:13.5px;white-space:pre-wrap}
+.pickl{max-height:240px;overflow:auto;border:1px solid #dcd6c6;border-radius:10px;padding:4px 12px;background:#fff}
+.pickl label{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid #f0ebe0;cursor:pointer}
+.pickl label:last-child{border-bottom:0}
+.pickl input{width:auto}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.two{grid-template-columns:1fr}}
 </style></head><body><div id="app"></div><script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js';
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,createUserWithEmailAndPassword} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js';
@@ -193,10 +212,11 @@ const ICON={
  inbox:svg('<path d="M3 13h5l1.5 3h5l1.5-3h5"/><path d="M5.5 5h13L21 13v6a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19v-6z"/>'),
  clock:svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
  star:svg('<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>'),
+ live:svg('<rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="m15.5 10.5 6-3.5v10l-6-3.5"/>'),
 };
 const displayName=()=>(profile?.name||'').trim();
 const initials=()=>{const n=displayName()||current?.email||'?';const p=n.replace(/@.*/,'').split(/[\s._-]+/).filter(Boolean);return ((p[0]?.[0]||'?')+(p.length>1?p[p.length-1][0]:'')).toUpperCase()};
-const PAGE_TITLE={dashboard:['Overview','My Dashboard'],users:['Trainees','Trainees'],tests:['Test Library','My Tests'],assignments:['Assignments','Assignments'],grading:['Marking','Marking'],trainee:['Trainee profile','Trainee profile'],reports:['Reports','My Results'],'html-exam':['Test','Test'],'test-taking':['Test','Test']};
+const PAGE_TITLE={dashboard:['Overview','My Dashboard'],users:['Trainees','Trainees'],tests:['Test Library','My Tests'],assignments:['Assignments','Assignments'],grading:['Marking','Marking'],trainee:['Trainee profile','Trainee profile'],reports:['Reports','My Results'],live:['Live classes','Live class'],'html-exam':['Test','Test'],'test-taking':['Test','Test']};
 function friendlyError(e){const c=String(e?.code||'');
  if(/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c))return 'Wrong username or password. Please try again.';
  if(/too-many-requests/.test(c))return 'Too many attempts. Please wait a few minutes and try again.';
@@ -224,8 +244,8 @@ function login(){root.innerHTML=`<div class="login"><div class="loginbox"><div c
   const value=e.target.identifier.value.trim(),pass=e.target.password.value;if(!value||!pass){err.textContent='Enter your username and password.';return}
   btn.disabled=true;btn.textContent='Signing in…';
   try{const email=value.includes('@')?value:usernameEmail(value);await signInWithEmailAndPassword(auth,email,pass)}catch(x){err.textContent=friendlyError(x);btn.disabled=false;btn.textContent='Sign in'}}}
-async function refresh(){if(!current)return;const [u,t,s]=await Promise.all([isAdmin()?getDocs(collection(fs,'users')):Promise.resolve(null),getDocs(collection(fs,'tests')),isAdmin()?getDocs(collection(fs,'submissions')):getDocs(query(collection(fs,'submissions'),where('userId','==',current.uid)))]);users=u?u.docs.map(d=>({id:d.id,...d.data()})):[];tests=t.docs.map(d=>({id:d.id,...d.data()}));submissions=s.docs.map(d=>({id:d.id,...d.data()}));}
-function render(){if(!current||!profile)return login();let admin=isAdmin(),items=admin?[['dashboard','Overview'],['users','Trainees'],['tests','Test Library'],['assignments','Assignments'],['grading','Marking'],['reports','Reports']]:[['dashboard','My Dashboard'],['tests','My Tests'],['reports','My Results']];
+async function refresh(){if(!current)return;const [u,t,s]=await Promise.all([isAdmin()?getDocs(collection(fs,'users')):Promise.resolve(null),getDocs(collection(fs,'tests')),isAdmin()?getDocs(collection(fs,'submissions')):getDocs(query(collection(fs,'submissions'),where('userId','==',current.uid)))]);users=u?u.docs.map(d=>({id:d.id,...d.data()})):[];tests=t.docs.map(d=>({id:d.id,...d.data()}));submissions=s.docs.map(d=>({id:d.id,...d.data()}));await loadLive();}
+function render(){if(!current||!profile)return login();let admin=isAdmin(),items=admin?[['dashboard','Overview'],['users','Trainees'],['tests','Test Library'],['assignments','Assignments'],['grading','Marking'],['reports','Reports'],['live','Live classes'+(openReqs().length?`<b class="navcount">${openReqs().length}</b>`:'')]]:[['dashboard','My Dashboard'],['tests','My Tests'],['reports','My Results'],['live','Live class']];
  const title=(PAGE_TITLE[page]||['',''])[admin?0:1],name=displayName()||(admin?'Instructor':'Student');
  root.innerHTML=`<div class="shell ${admin?'teacher-theme':'student-theme'}"><aside class="side"><div class="brand"><span class="logo">${ICON.logo}</span><span>Ashraf IELTS<small>ACADEMIC PRACTICE</small></span></div><nav>${items.map(([p,n])=>`<button class="nav ${page===p||(page==='trainee'&&p==='users')?'active':''}" data-nav="${p}">${ICON[p]||''}<span>${n}</span></button>`).join('')}</nav><div class="sidefoot">© ${new Date().getFullYear()} Ashraf IELTS Practice</div></aside><main class="main"><header class="top"><div class="crumb">${admin?'Instructor Portal':'Student Portal'}${title?`<span class="sep">›</span><b>${esc(title)}</b>`:''}</div><div class="row">${admin?`<button id="bell" class="btn secondary tiny bell" title="Finished tests" aria-label="Finished tests">${ICON.bell}<span id="bellCount" class="count"></span></button>`:''}<div class="usermenu"><button class="userchip" id="userBtn" aria-haspopup="true"><span class="avatar">${esc(initials())}</span><span class="uname">${esc(name)}</span></button><div class="menu hidden" id="userMenu"><div class="who"><b>${esc(name)}</b><span>${esc(admin?current.email:(profile.username||''))}</span></div>${admin?'<button id="editName">Change display name</button>':''}<button id="signout" class="out">Sign out</button></div></div></div></header><div class="content" id="content"></div></main></div>`;
  root.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{page=b.dataset.nav;render()});
@@ -233,7 +253,7 @@ function render(){if(!current||!profile)return login();let admin=isAdmin(),items
  document.getElementById('signout').onclick=()=>signOut(auth);
  document.getElementById('editName')?.addEventListener('click',editDisplayName);
  if(admin){document.getElementById('bell').onclick=showNotifications;updateBell()}
- ({dashboard,users:usersPage,trainee:traineePage,tests:testsPage,assignments:assignmentsPage,grading:gradingPage,reports:reportsPage}[page]||dashboard)()}
+ ({dashboard,users:usersPage,trainee:traineePage,tests:testsPage,assignments:assignmentsPage,grading:gradingPage,reports:reportsPage,live:livePage}[page]||dashboard)()}
 function editDisplayName(){showModal(`<h2>Display name</h2><p class="muted">This name appears in the welcome message and the top bar.</p><form id="nameForm"><label class="field">Name<input name="n" value="${esc(displayName())}" maxlength="40" placeholder="e.g. Mr. Ashraf" required></label><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn">Save</button></div></form>`);
  document.getElementById('cancelModal').onclick=closeModal;
  document.getElementById('nameForm').onsubmit=async e=>{e.preventDefault();const n=e.target.n.value.trim();if(!n)return;try{await updateDoc(doc(fs,'users',current.uid),{name:n});profile.name=n;closeModal();render();toast('Name saved.',null,'ok')}catch(x){message(x)}}}
@@ -254,12 +274,12 @@ function dashboard(){const admin=isAdmin(),ss=admin?submissions:submissions.filt
  const attention=admin?`<div class="card attn"><h3>Needs your attention</h3><p class="muted small" style="margin:0 0 6px">Writing and speaking tests waiting for a band and feedback.</p>${pend.length?pend.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,6).map(s=>`<div class="attnrow"><div><b>${esc(users.find(u=>u.id===s.userId)?.name||'Trainee')}</b> – ${esc(byId(s.testId)?.title||'Test')}<div class="meta">${esc(byId(s.testId)?.cat||'')} • submitted ${esc(whenText(s.date))}</div></div><button class="btn tiny" data-grade="${s.id}">Mark</button></div>`).join('')+(pend.length>6?`<p class="small muted" style="margin:10px 0 0">+ ${pend.length-6} more in Marking</p>`:''):`<div class="emptyok">${ICON.active.replace('<svg','<svg style="width:20px;height:20px"')} You’re all caught up – nothing to mark.</div>`}</div>`:studentUpNext();
  document.getElementById('content').innerHTML=`<div class="head"><div><h1>${greet}${name?', '+esc(name):''}</h1><p class="subtitle">${today} • ${admin?'Your IELTS Academic training at a glance.':'Your IELTS Academic learning journey.'}</p></div>${admin?'<div class="row"><button class="btn secondary" id="goUpload">Upload test</button><button class="btn" id="addTrainee">+ Add trainee</button></div>':''}</div>
  <div class="grid">${stats.map(([n,l,ic,note,cls])=>`<div class="card"><div class="statlabel">${l}${ic}</div><div class="metric">${esc(n)}</div><div class="statnote ${cls}">${note}</div></div>`).join('')}</div>
- ${attention}<h2 class="sectiontitle">Practice sections</h2><div class="sectioncards">${sec}</div>
+ ${liveDash()}${attention}<h2 class="sectiontitle">Practice sections</h2><div class="sectioncards">${sec}</div>
  <div class="card recent"><h3>Recent submissions</h3>${tableSub(ss.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,5))}</div>`;
  document.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{category=b.dataset.cat;stuSkill=b.dataset.cat;page='tests';render()});
  if(admin){document.getElementById('addTrainee').onclick=()=>openUser();document.getElementById('goUpload').onclick=()=>{page='tests';render();createTest()}}
  document.querySelectorAll('[data-gostart]').forEach(b=>b.onclick=()=>{stuSkill='All';page='tests';render()});
- wireGrades()}
+ wireGrades();wireLive()}
 function studentUpNext(){const todo=tests.filter(t=>visibleTest(t)&&eligible(t)&&!ownSub(t.id)).sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999')||libSort(a,b));
  if(!todo.length)return '';return `<div class="card upnext"><h3 style="margin:0 0 4px">Up next</h3>${todo.slice(0,3).map(t=>`<div class="attnrow"><div><b>${esc(t.title)}</b><div class="meta">${esc(t.cat)} • ${t.duration?esc(t.duration)+' min':''} ${dueChip(t,false)}</div></div><button class="btn tiny" data-gostart="${t.id}">Open</button></div>`).join('')}${todo.length>3?`<p class="small muted" style="margin:8px 0 0">+ ${todo.length-3} more in My Tests</p>`:''}</div>`}
 function tableSub(arr){return arr.length?`<div class="tablewrap"><table class="tbl"><tr><th>Trainee</th><th>Test</th><th>Submitted</th><th>Status</th><th>Score</th>${isAdmin()?'<th>Action</th>':''}</tr>${arr.map(s=>`<tr><td>${esc(users.find(u=>u.id===s.userId)?.name|| (s.userId===current.uid?profile.name:s.userId))}</td><td>${esc(byId(s.testId)?.title||'Deleted test')}<div class="small muted">${esc(byId(s.testId)?.cat||'')}</div></td><td>${esc((s.date||'').slice(0,10))}</td><td>${tag(s.status)}</td><td>${s.score==null?'—':esc(s.score)+'/'+esc(s.maxScore)} ${s.band!=null?'(Band '+esc(s.band)+')':''}</td>${isAdmin()?`<td><button class="btn tiny secondary" data-grade="${s.id}">Grade / Review</button></td>`:''}</tr>`).join('')}</table></div>`:'<div class="empty">No submissions yet.</div>'}
@@ -620,5 +640,108 @@ function startNotifications(){stopNotifications();let first=true;
 function stopNotifications(){if(notifUnsub){notifUnsub();notifUnsub=null}}
 window.addEventListener('focus',()=>{if(document.title.startsWith('🔔'))document.title='Ashraf IELTS Practice — Online'});
 
+// ---- Live classes: students request a lesson; the instructor sets the time, meeting link and code for one or more students ----
+// Firestore: liveRequests/{id} (one per student request) and liveSessions/{classId_uid} (one copy of each class per invited student).
+let liveRequests=[],liveSessions=[],liveError='';
+async function loadLive(){liveError='';
+ try{const mineOnly=c=>isAdmin()?getDocs(collection(fs,c)):getDocs(query(collection(fs,c),where('userId','==',current.uid)));
+  const [r,s]=await Promise.all([mineOnly('liveRequests'),mineOnly('liveSessions')]);
+  liveRequests=r.docs.map(d=>({id:d.id,...d.data()}));liveSessions=s.docs.map(d=>({id:d.id,...d.data()}))}
+ catch(e){console.warn('Live classes unavailable',e);liveRequests=[];liveSessions=[];liveError=String(e?.code||e?.message||e)}}
+const openReqs=()=>liveRequests.filter(r=>r.status==='open');
+const safeLink=u=>/^https:\/\/[^\s"'<>]+$/i.test(String(u||'').trim())?String(u).trim():'';
+const fmtWhen=d=>d?new Date(d).toLocaleString('en-GB',{weekday:'long',day:'numeric',month:'long',hour:'numeric',minute:'2-digit',hour12:true}):'Time not set';
+const toLocalInput=iso=>{if(!iso)return '';const d=new Date(iso);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
+const untilText=iso=>{const m=Math.round((new Date(iso)-Date.now())/6e4);if(m<0)return m>-60?'started '+(-m)+' min ago':'in progress';if(m<1)return 'starting now';if(m<60)return 'in '+m+' min';if(m<1440)return 'in '+Math.round(m/60)+' h';const d=Math.round(m/1440);return d===1?'tomorrow':'in '+d+' days'};
+const LIVE_TOPICS=['Speaking','Writing','Reading','Listening','General / mixed'];
+function liveClasses(){const m=new Map();
+ liveSessions.forEach(s=>{const k=s.classId||s.id;if(!m.has(k))m.set(k,{classId:k,title:s.title,when:s.when,duration:s.duration,link:s.link,code:s.code,note:s.note,status:s.status,members:[]});m.get(k).members.push(s)});
+ return [...m.values()].sort((a,b)=>(a.when||'').localeCompare(b.when||''))}
+// a class stays "upcoming" until its planned length (+30 min) has passed
+const classEnd=c=>new Date(c.when).getTime()+((Number(c.duration)||60)+30)*6e4;
+const isUpcoming=c=>c.status==='scheduled'&&classEnd(c)>Date.now();
+const canJoinSoon=c=>new Date(c.when).getTime()-Date.now()<30*6e4;
+function liveSetupNotice(){if(!liveError)return '';
+ return isAdmin()?`<div class="notice"><b>One step left:</b> the live class data isn’t allowed by your Firebase security rules yet. Open the Firebase console → <b>Firestore Database → Rules</b>, paste the “Live classes” rules you were given, and click <b>Publish</b>. Then refresh this page.<div class="small muted" style="margin-top:4px">(${esc(liveError)})</div></div>`
+  :`<div class="notice">Live classes aren’t available right now. Please contact your teacher.</div>`}
+function inviteText(c){return `Your IELTS live class with ${displayName()||'your teacher'}\n${c.title||'Live class'}\nWhen: ${fmtWhen(c.when)} (your local time)\n${safeLink(c.link)?'Join: '+safeLink(c.link)+'\n':''}${c.code?'Code: '+c.code+'\n':''}${c.note?c.note+'\n':''}You can also join from the “Live class” page in your Ashraf IELTS portal.`}
+async function copyText(t,label='Copied.'){try{await navigator.clipboard.writeText(t);toast(esc(label),null,'ok')}catch(_){showModal(`<h2>Copy this</h2><textarea style="min-height:180px" readonly>${esc(t)}</textarea><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn" id="cancelModal">Done</button></div>`);document.getElementById('cancelModal').onclick=closeModal}}
+function wireLive(){
+ document.querySelectorAll('[data-golive]').forEach(b=>b.onclick=()=>{page='live';render()});
+ document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copyText(b.dataset.copy,'Code copied.'))}
+// Small card on the dashboard
+function liveDash(){if(liveError)return '';
+ if(isAdmin()){const n=openReqs().length;if(!n)return '';
+  return `<div class="card attn"><div class="row spread"><div><h3 style="margin:0">🎥 ${n} live class request${n>1?'s':''}</h3><p class="muted small" style="margin:4px 0 0">Students are waiting for you to arrange a time.</p></div><button class="btn" data-golive="1">Arrange</button></div></div>`}
+ const next=liveClasses().filter(isUpcoming)[0];
+ if(next)return `<div class="card upnext"><div class="row spread"><div><h3 style="margin:0">🎥 Your next live class</h3><p style="margin:4px 0 0"><b>${esc(fmtWhen(next.when))}</b> <span class="muted small">(${esc(untilText(next.when))})</span></p></div><button class="btn" data-golive="1">Open</button></div></div>`;
+ return ''}
+function livePage(){if(isAdmin())return liveAdminPage();
+ const all=liveClasses(),up=all.filter(isUpcoming),past=all.filter(c=>!isUpcoming(c)).reverse(),open=openReqs();
+ document.getElementById('content').innerHTML=`<div class="head"><div><h1>Live class</h1><p class="subtitle">Book a live online lesson with your teacher. Once it’s arranged, the time, link and code appear here.</p></div>${liveError?'':'<button class="btn" id="reqLive">🎥 Request a live class</button>'}</div>${liveSetupNotice()}
+ <div class="card upnext"><h3 style="margin:0 0 2px">My upcoming classes</h3>${up.length?up.map(c=>{const link=safeLink(c.link);return `<div class="liverow"><div><div class="when">${esc(fmtWhen(c.when))}</div><div class="meta"><span>${esc(c.title||'Live class')}</span><span>• ${esc(untilText(c.when))}</span>${c.duration?`<span>• ${esc(c.duration)} min</span>`:''}</div>${c.code?`<div class="meta">Code: <span class="livecode">${esc(c.code)}</span><button class="btn tiny secondary" data-copy="${esc(c.code)}">Copy</button></div>`:''}${c.note?`<div class="reqnote">${esc(c.note)}</div>`:''}</div><div class="acts">${link?`<a class="btn join" href="${esc(link)}" target="_blank" rel="noopener">${ICON.live.replace('<svg','<svg style="width:20px;height:20px"')} Join class</a>`:'<span class="muted small">Your teacher will add the link soon.</span>'}</div></div>`}).join('')+`<p class="small muted" style="margin:10px 0 0">Times are shown in your device’s time zone. Please join a few minutes early and allow camera and microphone.</p>`:`<div class="empty">No class arranged yet.${open.length?' Your teacher will arrange a time soon.':' Tap “Request a live class” to ask for one.'}</div>`}</div>
+ ${open.length?`<div class="card"><h3 style="margin:0 0 2px">My requests</h3>${open.map(r=>`<div class="liverow"><div><b>Waiting for your teacher</b><div class="meta"><span>${esc(r.topic||'')}</span><span>• Preferred: ${esc(r.preferred||'Any time')}</span><span>• sent ${esc(whenText(r.date))}</span></div>${r.note?`<div class="reqnote">${esc(r.note)}</div>`:''}</div><button class="btn tiny danger" data-cancel-req="${r.id}">Cancel request</button></div>`).join('')}</div>`:''}
+ ${past.length?`<div class="card"><h3 style="margin:0 0 2px">Past classes</h3>${past.slice(0,10).map(c=>`<div class="liverow"><div><b>${esc(c.title||'Live class')}</b><div class="meta">${esc(fmtWhen(c.when))}</div></div>${tag(c.status==='cancelled'?'Cancelled':'Finished')}</div>`).join('')}</div>`:''}`;
+ document.getElementById('reqLive')?.addEventListener('click',()=>{if(open.length)return alert('You already have a request waiting. Your teacher will contact you soon.');requestLive()});
+ document.querySelectorAll('[data-cancel-req]').forEach(b=>b.onclick=async()=>{if(!await ask('Cancel this live class request?',{ok:'Cancel request',danger:true}))return;try{await deleteDoc(doc(fs,'liveRequests',b.dataset.cancelReq));await loadLive();render()}catch(e){message(e)}});
+ wireLive()}
+function requestLive(){showModal(`<h2>🎥 Request a live class</h2><p class="muted">Tell your teacher what you’d like to practise and when you’re free. Your teacher will arrange the time and send you the link and code here.</p><form id="reqForm"><label class="field">What would you like to practise?<select name="topic">${LIVE_TOPICS.map(t=>`<option>${t}</option>`).join('')}</select></label><label class="field">When are you free?<input name="preferred" maxlength="120" placeholder="e.g. Weekdays after 6 pm, or Saturday morning" required></label><label class="field">Message for your teacher (optional)<textarea name="note" maxlength="600" style="min-height:90px" placeholder="e.g. I have my exam on 20 November and want to improve Speaking Part 2."></textarea></label><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn" id="reqBtn">Send request</button></div></form>`);
+ document.getElementById('cancelModal').onclick=closeModal;
+ document.getElementById('reqForm').onsubmit=async e=>{e.preventDefault();const f=e.target,btn=document.getElementById('reqBtn');btn.disabled=true;btn.textContent='Sending…';
+  try{const id=doc(collection(fs,'liveRequests')).id;
+   await setDoc(doc(fs,'liveRequests',id),{userId:current.uid,name:displayName()||profile.username||'',username:profile.username||'',topic:f.topic.value,preferred:f.preferred.value.trim().slice(0,120),note:f.note.value.trim().slice(0,600),status:'open',date:new Date().toISOString()});
+   closeModal();await loadLive();render();toast('Request sent. Your teacher will arrange a time.',null,'ok')}
+  catch(x){message(x);btn.disabled=false;btn.textContent='Send request'}}}
+function liveAdminPage(){const reqs=openReqs().sort((a,b)=>(a.date||'').localeCompare(b.date||'')),all=liveClasses(),up=all.filter(isUpcoming),past=all.filter(c=>!isUpcoming(c)).reverse();
+ const names=c=>c.members.map(m=>users.find(u=>u.id===m.userId)?.name||m.studentName||'Student');
+ document.getElementById('content').innerHTML=`<div class="head"><div><h1>Live classes</h1><p class="subtitle">Arrange a time, meeting link and code for one student or a small group.</p></div>${liveError?'':'<button class="btn" id="newClass">+ New live class</button>'}</div>${liveSetupNotice()}
+ <div class="card attn"><h3 style="margin:0 0 2px">Class requests ${reqs.length?`(${reqs.length})`:''}</h3>${reqs.length?reqs.map(r=>`<div class="liverow"><div><b>${esc(users.find(u=>u.id===r.userId)?.name||r.name||'Student')}</b> <span class="tag">${esc(r.topic||'')}</span><div class="meta"><span>Free: <b>${esc(r.preferred||'Any time')}</b></span><span>• sent ${esc(whenText(r.date))}</span></div>${r.note?`<div class="reqnote">${esc(r.note)}</div>`:''}</div><div class="acts"><button class="btn" data-arrange="${r.id}">Arrange class</button><button class="btn tiny secondary" data-dismiss="${r.id}">Dismiss</button></div></div>`).join(''):'<div class="emptyok">No requests waiting.</div>'}</div>
+ <div class="card"><h3 style="margin:0 0 2px">Upcoming classes</h3>${up.length?up.map(c=>{const link=safeLink(c.link);return `<div class="liverow"><div><div class="when">${esc(fmtWhen(c.when))} <span class="muted small" style="font-weight:500">(${esc(untilText(c.when))})</span></div><div class="meta"><span><b>${esc(c.title||'Live class')}</b></span>${c.duration?`<span>• ${esc(c.duration)} min</span>`:''}<span>• ${esc(names(c).join(', '))}</span></div>${c.code?`<div class="meta">Code: <span class="livecode">${esc(c.code)}</span></div>`:''}</div><div class="acts">${link?`<a class="btn ${canJoinSoon(c)?'join':'secondary'}" href="${esc(link)}" target="_blank" rel="noopener">Start class</a>`:''}<button class="btn tiny secondary" data-invite="${esc(c.classId)}" title="Copy a message to send on WhatsApp">Copy message</button><button class="btn tiny secondary" data-editclass="${esc(c.classId)}">Edit</button><button class="btn tiny danger" data-cancelclass="${esc(c.classId)}">Cancel class</button></div></div>`}).join(''):'<div class="empty">No upcoming classes.</div>'}</div>
+ ${past.length?`<div class="card"><h3 style="margin:0 0 2px">Past and cancelled</h3>${past.slice(0,15).map(c=>`<div class="liverow"><div><b>${esc(c.title||'Live class')}</b> ${tag(c.status==='cancelled'?'Cancelled':'Finished')}<div class="meta">${esc(fmtWhen(c.when))} • ${esc(names(c).join(', '))}</div></div><div class="acts"><button class="btn tiny secondary" data-again="${esc(c.classId)}">Book again</button><button class="btn tiny danger" data-delclass="${esc(c.classId)}">Delete</button></div></div>`).join('')}</div>`:''}`;
+ const byClass=id=>all.find(c=>c.classId===id);
+ document.getElementById('newClass')?.addEventListener('click',()=>classModal(null,[]));
+ document.querySelectorAll('[data-arrange]').forEach(b=>b.onclick=()=>{const r=liveRequests.find(x=>x.id===b.dataset.arrange);classModal(null,[r.userId],r)});
+ document.querySelectorAll('[data-dismiss]').forEach(b=>b.onclick=async()=>{if(!await ask('Dismiss this request without arranging a class?',{ok:'Dismiss'}))return;try{await updateDoc(doc(fs,'liveRequests',b.dataset.dismiss),{status:'dismissed'});await loadLive();render()}catch(e){message(e)}});
+ document.querySelectorAll('[data-editclass]').forEach(b=>b.onclick=()=>{const c=byClass(b.dataset.editclass);classModal(c,c.members.map(m=>m.userId))});
+ document.querySelectorAll('[data-again]').forEach(b=>b.onclick=()=>{const c=byClass(b.dataset.again);classModal({...c,classId:null,when:'',members:[]},c.members.map(m=>m.userId))});
+ document.querySelectorAll('[data-invite]').forEach(b=>b.onclick=()=>copyText(inviteText(byClass(b.dataset.invite)),'Message copied – paste it in WhatsApp.'));
+ document.querySelectorAll('[data-cancelclass]').forEach(b=>b.onclick=async()=>{const c=byClass(b.dataset.cancelclass);if(!await ask('Cancel this class? The students will see it as cancelled in their portal.',{ok:'Cancel class',danger:true}))return;
+  try{const batch=writeBatch(fs);c.members.forEach(m=>batch.update(doc(fs,'liveSessions',m.id),{status:'cancelled'}));await batch.commit();await loadLive();render();toast('Class cancelled.',null,'ok')}catch(e){message(e)}});
+ document.querySelectorAll('[data-delclass]').forEach(b=>b.onclick=async()=>{const c=byClass(b.dataset.delclass);if(!await ask('Delete this class from the list?',{ok:'Delete',danger:true}))return;
+  try{const batch=writeBatch(fs);c.members.forEach(m=>batch.delete(doc(fs,'liveSessions',m.id)));await batch.commit();await loadLive();render()}catch(e){message(e)}});
+ wireLive()}
+function classModal(c,selected,fromReq=null){
+ const studs=users.filter(u=>u.role==='student'&&(u.active||selected.includes(u.id))).sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+ const waiting=new Set(openReqs().map(r=>r.userId)),editing=!!c?.classId;
+ const title=c?.title||(fromReq?`${fromReq.topic&&!/General/.test(fromReq.topic)?fromReq.topic+' ':''}live class`:'Live class');
+ showModal(`<h2>${editing?'Edit live class':'🎥 Arrange a live class'}</h2>${fromReq?`<div class="notice small" style="margin-top:0"><b>${esc(users.find(u=>u.id===fromReq.userId)?.name||fromReq.name)}</b> is free: ${esc(fromReq.preferred||'any time')}${fromReq.note?`<br>“${esc(fromReq.note)}”`:''}</div>`:''}
+ <form id="classForm"><label class="field">Class title<input name="title" maxlength="80" value="${esc(title)}" required></label>
+ <div class="two"><label class="field">Date and time<input type="datetime-local" name="when" value="${esc(toLocalInput(c?.when))}" required></label><label class="field">Length (minutes)<input type="number" name="duration" min="10" max="240" step="5" value="${esc(c?.duration||60)}"></label></div>
+ <label class="field">Meeting link (Google Meet, Teams or Zoom)<input name="link" type="url" value="${esc(c?.link||'')}" placeholder="https://meet.google.com/abc-defg-hij"></label>
+ <p class="small muted" style="margin:-6px 0 6px">Tip: create the meeting at <b>meet.google.com</b> (New meeting → “Create a meeting for later”) and paste the link here. You can reuse one link for all your classes.</p>
+ <label class="field">Session code / passcode (optional)<input name="code" maxlength="40" value="${esc(c?.code||'')}" placeholder="e.g. 482 913"></label>
+ <label class="field">Note for the students (optional)<textarea name="note" maxlength="500" style="min-height:70px" placeholder="e.g. Have a pen and paper ready. We will practise Part 2 cue cards.">${esc(c?.note||'')}</textarea></label>
+ <div class="field">Students in this class <span class="small muted">(choose one, two or more)</span><input id="pickSearch" placeholder="Search students" autocomplete="off"><div class="pickl" id="pickList">${studs.map(u=>`<label data-find="${esc((u.name+' '+(u.username||'')+' '+(u.group||'')).toLowerCase())}"><input type="checkbox" name="stu" value="${u.id}" ${selected.includes(u.id)?'checked':''}><span><b>${esc(u.name)}</b> <span class="small muted">${esc(u.username||'')}${u.group?' • '+esc(u.group):''}</span>${waiting.has(u.id)?' <span class="tag">requested</span>':''}${u.active?'':' <span class="tag">disabled</span>'}</span></label>`).join('')||'<div class="empty">No active students.</div>'}</div><p class="small muted" id="pickCount" style="margin:4px 0 0"></p></div>
+ <p id="classErr" class="error" role="alert"></p>
+ <div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn" id="saveClass">${editing?'Save changes':'Save and send to students'}</button></div></form>`);
+ const f=document.getElementById('classForm'),err=document.getElementById('classErr'),count=()=>{const n=f.querySelectorAll('[name=stu]:checked').length;document.getElementById('pickCount').textContent=n?`${n} student${n>1?'s':''} selected`:'No student selected'};count();
+ document.getElementById('cancelModal').onclick=closeModal;f.onchange=count;
+ document.getElementById('pickSearch').oninput=e=>{const q=e.target.value.trim().toLowerCase();f.querySelectorAll('#pickList label').forEach(l=>l.style.display=l.dataset.find.includes(q)?'':'none')};
+ f.onsubmit=async e=>{e.preventDefault();err.textContent='';const btn=document.getElementById('saveClass');
+  const ids=[...f.querySelectorAll('[name=stu]:checked')].map(x=>x.value),link=f.link.value.trim(),when=new Date(f.when.value);
+  if(!ids.length)return err.textContent='Choose at least one student.';
+  if(!f.when.value||isNaN(when))return err.textContent='Choose the date and time.';
+  if(link&&!safeLink(link))return err.textContent='The meeting link must start with https://';
+  if(!link&&!await ask('Save without a meeting link? Students will see “link coming soon” until you add it.',{ok:'Save anyway'}))return;
+  btn.disabled=true;btn.textContent='Saving…';
+  try{const classId=c?.classId||doc(collection(fs,'liveSessions')).id,now=new Date().toISOString();
+   const base={classId,title:f.title.value.trim()||'Live class',when:when.toISOString(),duration:Math.max(10,Math.min(240,Number(f.duration.value)||60)),link,code:f.code.value.trim(),note:f.note.value.trim(),status:'scheduled',updatedAt:now};
+   const batch=writeBatch(fs),old=c?.members||[];
+   ids.forEach(uid=>{const u=users.find(x=>x.id===uid),prev=old.find(m=>m.userId===uid);batch.set(doc(fs,'liveSessions',classId+'_'+uid),{...base,userId:uid,studentName:u?.name||'',createdAt:prev?.createdAt||now})});
+   old.filter(m=>!ids.includes(m.userId)).forEach(m=>batch.delete(doc(fs,'liveSessions',m.id)));
+   openReqs().filter(r=>ids.includes(r.userId)).forEach(r=>batch.update(doc(fs,'liveRequests',r.id),{status:'arranged',classId}));
+   await batch.commit();closeModal();await loadLive();render();
+   toast(editing?'Class updated. Students see the changes in their portal.':`Class saved. ${ids.length>1?ids.length+' students':'The student'} can now see the time and “Join class” button.`,null,'ok')}
+  catch(x){message(x);btn.disabled=false;btn.textContent=editing?'Save changes':'Save and send to students'}}}
 onAuthStateChanged(auth,async user=>{stopNotifications();current=user;profile=null;if(!user){clearInterval(timer);login();return}try{let snap=await getDoc(doc(fs,'users',user.uid));if(!snap.exists()||!snap.data().active){root.innerHTML=`<div class="login"><div class="loginbox"><div class="loginlogo">${ICON.logo}</div><h2>Your account isn’t active</h2><p class="muted">Please ask your instructor to activate your account, then sign in again.</p><button id="exit" class="btn">Sign out</button></div></div>`;document.getElementById('exit').onclick=()=>signOut(auth);return}profile=snap.data();await refresh();page='dashboard';render();if(isAdmin()){startNotifications();if(unseenSubs().length)showNotifications()}}catch(e){root.innerHTML=`<div class="login"><div class="loginbox"><div class="loginlogo">${ICON.logo}</div><h2>We couldn’t load your portal</h2><p class="muted">Check your internet connection and refresh the page.</p><p class="error">${esc(friendlyError(e))}</p><button id="exit" class="btn">Sign out</button></div></div>`;document.getElementById('exit').onclick=()=>signOut(auth)}});login();
 </script></body></html>
