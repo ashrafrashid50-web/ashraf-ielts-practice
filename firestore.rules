@@ -1,0 +1,77 @@
+rules_version = '2';
+
+// Ashraf IELTS Practice — Firestore security rules
+// Matches exactly what index.html reads and writes.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+    function signedIn() { return request.auth != null; }
+    function me() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data; }
+    function hasProfile() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)); }
+    function isActive() { return hasProfile() && me().active == true; }
+    function isAdmin() { return isActive() && me().role == 'admin'; }
+
+    // Test is active and assigned to this student (ALL, their uid, or their group)
+    function canTakeTest(testId) {
+      let t = get(/databases/$(database)/documents/tests/$(testId)).data;
+      let u = me();
+      return t.active == true && (
+        t.assign.hasAny(['ALL', request.auth.uid]) ||
+        (u.get('group', '') is string && u.get('group', '') != '' && t.assign.hasAny(['GROUP:' + u.get('group', '')]))
+      );
+    }
+
+    // ---------- users ----------
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ---------- tests ----------
+    match /tests/{testId} {
+      allow read: if isActive();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ---------- submissions ----------
+    // Document id = <studentUid>_<testId>. Students create once; only the instructor edits/grades.
+    match /submissions/{subId} {
+      allow read: if isAdmin() || (isActive() && resource.data.userId == request.auth.uid);
+
+      allow create: if isActive()
+        && !isAdmin()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.testId is string
+        && subId == request.auth.uid + '_' + request.resource.data.testId
+        && request.resource.data.keys().hasOnly([
+             'testId','userId','date','status','score','maxScore','band',
+             'feedback','response','answers','reviewState','source','videoPath',
+             'wordCount','timeSpent','integrity','recordings','notes'
+           ])
+        && request.resource.data.status in ['Completed', 'Pending grading']
+        && canTakeTest(request.resource.data.testId);
+
+      allow update, delete: if isAdmin();
+    }
+
+    // ---------- live classes ----------
+    // Students request a lesson; only the instructor arranges it.
+    match /liveRequests/{id} {
+      allow read: if isAdmin() || (isActive() && resource.data.userId == request.auth.uid);
+      allow create: if isActive()
+        && !isAdmin()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'open';
+      allow update: if isAdmin();
+      allow delete: if isAdmin()
+        || (isActive() && resource.data.userId == request.auth.uid && resource.data.status == 'open');
+    }
+
+    // One copy of each class per invited student (time, meeting link, code).
+    match /liveSessions/{id} {
+      allow read: if isAdmin() || (isActive() && resource.data.userId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}
