@@ -1,0 +1,53 @@
+LIVE CLASSES – FIRESTORE RULES
+================================
+
+Where to paste:
+1. Open https://console.firebase.google.com and choose the project "ashraf-ielts-practice".
+2. Go to Firestore Database -> Rules.
+3. Find the line:   match /databases/{database}/documents {
+4. Paste everything between the two dashed lines just BELOW that line
+   (inside it, next to your other "match" blocks). Do not delete your existing rules.
+5. Click Publish, then refresh your portal.
+
+What these rules do:
+- Only signed-in, ACTIVE students can send a live class request, and only for themselves.
+- A student can only see their own requests and their own classes (time, link, code).
+- If you Disable a student, they can no longer see any class links or codes.
+- Only you (the admin) can arrange, edit, cancel or delete classes.
+
+------------------------------------------------------------------------
+    // ===== Live classes =====
+    function liveUser() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function liveIsAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && liveUser().role == 'admin';
+    }
+    function liveIsActive() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && liveUser().active == true;
+    }
+
+    match /liveRequests/{id} {
+      allow read: if liveIsAdmin()
+        || (request.auth != null && resource.data.userId == request.auth.uid);
+      allow create: if liveIsActive()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'open';
+      allow update: if liveIsAdmin();
+      allow delete: if liveIsAdmin()
+        || (request.auth != null
+            && resource.data.userId == request.auth.uid
+            && resource.data.status == 'open');
+    }
+
+    match /liveSessions/{id} {
+      allow read: if liveIsAdmin()
+        || (liveIsActive() && resource.data.userId == request.auth.uid);
+      allow write: if liveIsAdmin();
+    }
+    // ===== End of live classes =====
+------------------------------------------------------------------------
