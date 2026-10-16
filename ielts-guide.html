@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>IELTS Skills and Scores</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,600;7..72,700&family=Figtree:wght@400;600;800&family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap">
+<style>
+/* Layout: one slide "card" centred under a slim control bar; slide body reflows from 4 columns to 1 */
+:root{
+  --bg:#eef3ef; --surface:#ffffff; --ink:#10261e; --mute:#55675e; --line:#d5e1d9;
+  --green:#0f6b3b; --deep:#0b3d2e; --gold:#b8860b; --goldsoft:#fff6dc; --goldline:#ecd28c;
+  --c-listen:#1d4ed8; --c-read:#0f6b3b; --c-write:#c2410c; --c-speak:#7c3aed;
+  --f-display:"Literata",Georgia,serif; --f-body:"Figtree",system-ui,sans-serif; --f-ar:"IBM Plex Sans Arabic","Noto Sans Arabic",Tahoma,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0a1f18; --surface:#123026; --ink:#e8f1ec; --mute:#a3b8ad; --line:#24493b;
+  --green:#4cc285; --deep:#082a20; --gold:#e3b341; --goldsoft:#2b2612; --goldline:#5c4b17;
+  --c-listen:#7fa2ff; --c-read:#4cc285; --c-write:#ff8a57; --c-speak:#b794ff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a1f18; --surface:#123026; --ink:#e8f1ec; --mute:#a3b8ad; --line:#24493b;
+  --green:#4cc285; --deep:#082a20; --gold:#e3b341; --goldsoft:#2b2612; --goldline:#5c4b17;
+  --c-listen:#7fa2ff; --c-read:#4cc285; --c-write:#ff8a57; --c-speak:#b794ff; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{font-family:var(--f-display);font-weight:700;font-size:20px;color:var(--green)}
+.brand small{display:block;font-family:var(--f-body);font-weight:600;font-size:13px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;color:var(--ink);font:600 14px var(--f-body);padding:8px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--green);color:var(--surface)}
+.seg button:focus-visible,.ctl:focus-visible,.dot:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.slide{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:clamp(20px,4vw,44px);min-height:430px;display:flex;flex-direction:column;gap:18px;position:relative;overflow:hidden}
+.slide.hero{background:var(--deep);color:#f2f7f4;border-color:var(--deep)}
+.slide.hero .kick{color:#e3b341}.slide.hero .sub{color:#c9dbd1}
+.kick{font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--k,var(--green))}
+h1{font-family:var(--f-display);font-size:clamp(28px,4.4vw,48px);line-height:1.12;margin:0;text-wrap:balance}
+.hero h1{font-size:clamp(32px,5.4vw,60px)}
+.sub{color:var(--mute);font-size:clamp(17px,2vw,21px);max-width:62ch;margin:0}
+.ar{font-family:var(--f-ar);direction:rtl;text-align:right}
+.ar-line{font-family:var(--f-ar);direction:rtl;text-align:right;color:var(--mute);font-size:.92em;margin-top:4px}
+.hero .ar-line{color:#c9dbd1}
+.items{display:grid;gap:14px;grid-template-columns:repeat(var(--cols,2),minmax(0,1fr))}
+.item{border:1px solid var(--line);border-top:5px solid var(--c,var(--green));border-radius:12px;padding:16px 16px 14px;min-width:0}
+.item .tg{font-weight:800;font-size:13px;color:var(--c,var(--green));letter-spacing:.04em}
+.item h3{margin:2px 0 4px;font-size:20px}
+.item .big{font-family:var(--f-display);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.item p{margin:0;color:var(--mute)}
+.tip{background:var(--goldsoft);border:1px solid var(--goldline);border-radius:12px;padding:12px 16px;font-weight:600}
+.bands{display:grid;gap:7px}
+.band{display:grid;grid-template-columns:44px minmax(110px,170px) 1fr;gap:12px;align-items:center}
+.band b{font-family:var(--f-display);font-size:24px;text-align:center;border-radius:8px;color:#fff;background:var(--green)}
+.band i{height:18px;border-radius:6px;background:linear-gradient(90deg,var(--green),var(--gold));display:block}
+.band span{font-weight:600}
+table{border-collapse:collapse;font-variant-numeric:tabular-nums;width:100%}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:center}
+th{color:var(--mute);font-size:14px;text-transform:uppercase;letter-spacing:.06em}
+.sum{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:clamp(22px,3vw,32px);font-weight:800;font-variant-numeric:tabular-nums}
+.sum .p{border:1px solid var(--line);border-radius:10px;padding:6px 14px;background:var(--bg)}
+.sum .p small{display:block;font-size:12px;color:var(--mute);font-weight:600}
+.sum .res{background:var(--green);color:var(--surface);border-color:var(--green)}
+.sum .res small{color:inherit;opacity:.8}
+.sum .op{color:var(--mute)}
+.reveal>*{animation:rise .5s ease both}
+.reveal>*:nth-child(2){animation-delay:.08s}.reveal>*:nth-child(3){animation-delay:.16s}.reveal>*:nth-child(4){animation-delay:.24s}.reveal>*:nth-child(5){animation-delay:.32s}
+@keyframes rise{from{opacity:.001;transform:translateY(10px)}}
+@media (prefers-reduced-motion:reduce){.reveal>*{animation:none}}
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ctl{border:1px solid var(--line);background:var(--surface);color:var(--ink);font:700 15px var(--f-body);border-radius:10px;padding:10px 16px;cursor:pointer;min-height:44px}
+.ctl.play{background:var(--green);color:var(--surface);border-color:var(--green);min-width:150px}
+.dots{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.dot{width:12px;height:12px;border-radius:50%;border:0;background:var(--line);cursor:pointer;padding:0}
+.dot[aria-current="true"]{background:var(--gold);transform:scale(1.25)}
+.prog{height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
+.note{font-size:14px;color:var(--mute)}
+.cap{border-left:4px solid var(--gold);padding:8px 12px;background:var(--surface);border-radius:0 10px 10px 0;min-height:44px;font-size:16px}
+@media (max-width:760px){.items{--cols:1!important}.band{grid-template-columns:40px 1fr}.band i{display:none}.dots{margin-left:0}.slide{min-height:0}}
+</style>
+</head><body>
+
+<div class="wrap">
+  <header>
+    <div class="brand">IELTS: Skills and Scores<small>Ashraf IELTS · Student guide</small></div>
+    <div class="seg" role="group" aria-label="Language">
+      <button id="lang-en" data-lang="en" aria-pressed="false">English</button>
+      <button id="lang-both" data-lang="both" aria-pressed="true">English + عربي</button>
+      <button id="lang-ar" data-lang="ar" aria-pressed="false">عربي</button>
+    </div>
+  </header>
+
+  <div class="prog"><i id="prog"></i></div>
+  <article class="slide" id="slide" aria-live="polite"></article>
+
+  <div class="bar">
+    <button class="ctl" id="prev" aria-label="Previous slide">← Back</button>
+    <button class="ctl play" id="play">▶ Play with voice</button>
+    <button class="ctl" id="next" aria-label="Next slide">Next →</button>
+    <div class="seg" role="group" aria-label="Voice language">
+      <button id="voice-en" data-voice="en" aria-pressed="true">🔊 English voice</button>
+      <button id="voice-ar" data-voice="ar" aria-pressed="false">🔊 صوت عربي</button>
+    </div>
+    <div class="dots" id="dots"></div>
+  </div>
+  <div class="cap" id="cap">Press <b>Play with voice</b> and the guide reads each slide aloud, then moves on by itself. You can also use Back and Next.</div>
+  <p class="note" id="vnote">The voice comes from your own device, so it sounds different on a phone, a laptop or a tablet.</p>
+  <section class="slide" style="min-height:0" id="video">
+    <div class="kick">Watch the video · شاهد الفيديو</div>
+    <video controls preload="metadata" playsinline style="width:100%;border-radius:12px;background:#000" src="ielts-guide.mp4"></video>
+    <p class="note" style="margin:0">The video has no sound. Use the talking slides above to hear each part read aloud. · الفيديو بدون صوت، استخدم الشرائح الناطقة في الأعلى للاستماع.</p>
+  </section>
+  <p class="note"><a href="./" style="color:var(--green);font-weight:700">← Back to Ashraf IELTS Practice</a></p>
+</div>
+
+<script>
+const S=[
+{hero:1,kick:["Ashraf IELTS · Student guide","أشرف آيلتس · دليل الطالب"],
+ title:["IELTS explained: the 4 skills and your band score","شرح اختبار الآيلتس: المهارات الأربع ودرجتك"],
+ sub:["What happens on test day, how long each part takes, and how your score out of 9 is worked out. With Mr. Ashraf.","ماذا يحدث يوم الاختبار، وكم يستغرق كل جزء، وكيف تُحسب درجتك من 9. مع الأستاذ أشرف."],
+ say:["Welcome to Ashraf IELTS. In this short guide, you will learn the four skills in the IELTS test, how long each part takes, and how your band score out of nine is worked out.","مرحبًا بكم في أشرف آيلتس. في هذا الدليل القصير ستتعرف على المهارات الأربع في اختبار الآيلتس، وكم يستغرق كل جزء، وكيف تُحسب درجتك من تسعة."]},
+{kick:["Step 1","الخطوة 1"],title:["Two types of IELTS","نوعان من اختبار الآيلتس"],cols:2,
+ items:[{c:"--c-read",tg:["For university","للدراسة الجامعية"],h:["IELTS Academic","آيلتس الأكاديمي"],p:["For university study and some professional jobs, such as doctors and nurses.","للدراسة في الجامعة وبعض المهن مثل الأطباء والممرضين."]},
+        {c:"--c-listen",tg:["For work and migration","للعمل والهجرة"],h:["IELTS General Training","آيلتس العام"],p:["For work, school below university level, or moving to another country.","للعمل أو الدراسة قبل الجامعة أو الانتقال للعيش في بلد آخر."]}],
+ tip:["Listening and Speaking are the same in both. Reading and Writing are different.","الاستماع والمحادثة متشابهان في النوعين، أما القراءة والكتابة فمختلفتان."],
+ say:["There are two types of IELTS. IELTS Academic is for university study. IELTS General Training is for work, or for moving to another country. Listening and Speaking are the same in both types. Reading and Writing are different.","هناك نوعان من اختبار الآيلتس. الآيلتس الأكاديمي للدراسة الجامعية. والآيلتس العام للعمل أو للانتقال إلى بلد آخر. الاستماع والمحادثة متشابهان في النوعين، أما القراءة والكتابة فمختلفتان."]},
+{kick:["Step 2","الخطوة 2"],title:["Four skills, one test day","أربع مهارات في يوم واحد"],cols:4,
+ items:[{c:"--c-listen",tg:["🎧 Listening","🎧 الاستماع"],big:["30 min","30 دقيقة"],p:["40 questions · 4 recordings","40 سؤالًا · 4 تسجيلات"]},
+        {c:"--c-read",tg:["📖 Reading","📖 القراءة"],big:["60 min","60 دقيقة"],p:["40 questions · 3 long texts","40 سؤالًا · 3 نصوص طويلة"]},
+        {c:"--c-write",tg:["✍️ Writing","✍️ الكتابة"],big:["60 min","60 دقيقة"],p:["2 tasks","مهمتان"]},
+        {c:"--c-speak",tg:["🗣️ Speaking","🗣️ المحادثة"],big:["11–14 min","11–14 دقيقة"],p:["3 parts · face to face","3 أجزاء · وجهًا لوجه"]}],
+ tip:["Listening, Reading and Writing are done together, in about 2 hours 40 minutes. Speaking can be on the same day or a few days before or after.","الاستماع والقراءة والكتابة تكون معًا في حوالي ساعتين و40 دقيقة. أما المحادثة فقد تكون في اليوم نفسه أو قبله أو بعده بأيام."],
+ say:["The test has four skills. Listening takes about thirty minutes, with forty questions. Reading takes sixty minutes, with forty questions. Writing takes sixty minutes, with two tasks. Speaking takes eleven to fourteen minutes, face to face with an examiner.","يتكون الاختبار من أربع مهارات. الاستماع حوالي ثلاثين دقيقة وفيه أربعون سؤالًا. القراءة ستون دقيقة وفيها أربعون سؤالًا. الكتابة ستون دقيقة وفيها مهمتان. والمحادثة من إحدى عشرة إلى أربع عشرة دقيقة وجهًا لوجه مع الممتحن."]},
+{kick:["🎧 Listening · 30 minutes · 40 questions","🎧 الاستماع · 30 دقيقة · 40 سؤالًا"],k:"--c-listen",title:["You hear each recording only once","تسمع كل تسجيل مرة واحدة فقط"],cols:4,
+ items:[{c:"--c-listen",tg:["Part 1","الجزء 1"],h:["Conversation","محادثة"],p:["Two people, everyday life, like booking a hotel.","شخصان في موقف يومي مثل حجز فندق."]},
+        {c:"--c-listen",tg:["Part 2","الجزء 2"],h:["Monologue","حديث فردي"],p:["One person, everyday life, like a tour guide.","شخص واحد في موقف يومي مثل مرشد سياحي."]},
+        {c:"--c-listen",tg:["Part 3","الجزء 3"],h:["Discussion","نقاش"],p:["Up to four people talking about study.","حتى أربعة أشخاص يتحدثون عن الدراسة."]},
+        {c:"--c-listen",tg:["Part 4","الجزء 4"],h:["Lecture","محاضرة"],p:["One speaker on an academic topic.","متحدث واحد في موضوع أكاديمي."]}],
+ tip:["Read the questions before you listen, and check your spelling. A wrong spelling is a wrong answer.","اقرأ الأسئلة قبل الاستماع، وانتبه للإملاء. الكلمة المكتوبة خطأ تُعد إجابة خاطئة."],
+ say:["In Listening, you hear four recordings, and you hear each one only once. Read the questions before you listen, and check your spelling, because a wrong spelling is a wrong answer.","في الاستماع تسمع أربعة تسجيلات، وتسمع كل تسجيل مرة واحدة فقط. اقرأ الأسئلة قبل الاستماع، وانتبه للإملاء، لأن الكلمة المكتوبة خطأ تُعد إجابة خاطئة."]},
+{kick:["📖 Reading · 60 minutes · 40 questions","📖 القراءة · 60 دقيقة · 40 سؤالًا"],title:["Three long texts, many question types","ثلاثة نصوص طويلة وأنواع كثيرة من الأسئلة"],cols:2,
+ items:[{c:"--c-read",tg:["Question types","أنواع الأسئلة"],p:["Multiple choice · True / False / Not Given · Matching headings · Sentence and summary completion · Short answers","اختيار من متعدد · صح / خطأ / غير مذكور · مطابقة العناوين · إكمال الجمل والملخص · إجابات قصيرة"]},
+        {c:"--c-read",tg:["No extra time","لا يوجد وقت إضافي"],p:["You write your answers during the 60 minutes. Spend about 20 minutes on each text.","تكتب إجاباتك خلال الستين دقيقة نفسها. خصص حوالي 20 دقيقة لكل نص."]}],
+ tip:["Skim first for the main idea, then scan for key words like names, numbers and dates.","اقرأ سريعًا أولًا لفهم الفكرة العامة، ثم ابحث عن الكلمات المهمة مثل الأسماء والأرقام والتواريخ."],
+ say:["In Reading, you have sixty minutes for three long texts and forty questions. There is no extra time to write your answers, so spend about twenty minutes on each text. Skim first for the main idea, then scan for names, numbers and dates.","في القراءة لديك ستون دقيقة لثلاثة نصوص طويلة وأربعين سؤالًا. لا يوجد وقت إضافي لكتابة الإجابات، فخصص حوالي عشرين دقيقة لكل نص. اقرأ سريعًا لفهم الفكرة العامة، ثم ابحث عن الأسماء والأرقام والتواريخ."]},
+{kick:["✍️ Writing · 60 minutes · 2 tasks","✍️ الكتابة · 60 دقيقة · مهمتان"],k:"--c-write",title:["Task 2 is worth twice as much as Task 1","المهمة الثانية تساوي ضعف المهمة الأولى"],cols:2,
+ items:[{c:"--c-write",tg:["Task 1 · 20 min · 150+ words","المهمة 1 · 20 دقيقة · 150 كلمة أو أكثر"],p:["Academic: describe a graph, table, chart, map or process. General: write a letter.","الأكاديمي: وصف رسم بياني أو جدول أو خريطة أو عملية. العام: كتابة رسالة."]},
+        {c:"--c-write",tg:["Task 2 · 40 min · 250+ words","المهمة 2 · 40 دقيقة · 250 كلمة أو أكثر"],p:["Write an essay: give your opinion, discuss two views, or explain a problem and solutions.","كتابة مقال: إبداء الرأي، أو مناقشة وجهتي نظر، أو شرح مشكلة وحلولها."]}],
+ tip:["Marked on: Task Achievement or Response · Coherence and Cohesion · Lexical Resource · Grammatical Range and Accuracy","معايير التقييم: إنجاز المهمة · الترابط والتماسك · ثراء المفردات · تنوع القواعد ودقتها"],
+ say:["In Writing, Task one is at least one hundred and fifty words, in about twenty minutes. Task two is an essay of at least two hundred and fifty words, in about forty minutes. Task two is worth twice as much. You are marked on task response, coherence and cohesion, vocabulary, and grammar.","في الكتابة، المهمة الأولى مئة وخمسون كلمة على الأقل في حوالي عشرين دقيقة. والمهمة الثانية مقال من مئتين وخمسين كلمة على الأقل في حوالي أربعين دقيقة. المهمة الثانية تساوي ضعف الأولى. ويتم التقييم على إنجاز المهمة، والترابط، والمفردات، والقواعد."]},
+{kick:["🗣️ Speaking · 11–14 minutes · with a real examiner","🗣️ المحادثة · 11–14 دقيقة · مع ممتحن حقيقي"],k:"--c-speak",title:["Three parts, like a conversation","ثلاثة أجزاء مثل حوار طبيعي"],cols:3,
+ items:[{c:"--c-speak",tg:["Part 1 · 4–5 min","الجزء 1 · 4–5 دقائق"],h:["Introduction","التعارف"],p:["Questions about you: home, work, study, hobbies.","أسئلة عنك: المنزل، العمل، الدراسة، الهوايات."]},
+        {c:"--c-speak",tg:["Part 2 · 3–4 min","الجزء 2 · 3–4 دقائق"],h:["Long turn","الحديث المطوّل"],p:["A topic card. 1 minute to prepare, then talk for up to 2 minutes.","بطاقة موضوع. دقيقة للتحضير ثم تتحدث حتى دقيقتين."]},
+        {c:"--c-speak",tg:["Part 3 · 4–5 min","الجزء 3 · 4–5 دقائق"],h:["Discussion","النقاش"],p:["Deeper questions about the Part 2 topic. Give reasons and examples.","أسئلة أعمق عن موضوع الجزء الثاني. قدّم أسبابًا وأمثلة."]}],
+ tip:["Marked on: Fluency and Coherence · Lexical Resource · Grammatical Range and Accuracy · Pronunciation","معايير التقييم: الطلاقة والترابط · ثراء المفردات · تنوع القواعد ودقتها · النطق"],
+ say:["Speaking has three parts. In part one, you answer questions about yourself. In part two, you get a topic card, one minute to prepare, and you talk for up to two minutes. In part three, you discuss deeper questions. You are marked on fluency, vocabulary, grammar, and pronunciation.","المحادثة لها ثلاثة أجزاء. في الجزء الأول تجيب عن أسئلة عن نفسك. في الجزء الثاني تحصل على بطاقة موضوع ودقيقة للتحضير، ثم تتحدث حتى دقيقتين. وفي الجزء الثالث تناقش أسئلة أعمق. ويتم التقييم على الطلاقة والمفردات والقواعد والنطق."]},
+{kick:["Step 3 · Scores","الخطوة 3 · الدرجات"],title:["Every skill gets a band from 0 to 9","كل مهارة تحصل على درجة من 0 إلى 9"],bands:1,
+ tip:["Scores can include halves, like 5.5 or 6.5. Many universities ask for 6.0 to 7.0. Always check what your university or job needs.","قد تكون الدرجة بنصف، مثل 5.5 أو 6.5. كثير من الجامعات تطلب من 6.0 إلى 7.0. تأكد دائمًا من المطلوب في جامعتك أو عملك."],
+ say:["Each skill gets a band score from zero to nine. Nine is an expert user, seven is a good user, six is a competent user, and five is a modest user. Scores can include halves, like six point five. Many universities ask for six to seven.","تحصل كل مهارة على درجة من صفر إلى تسعة. تسعة تعني مستخدمًا خبيرًا، وسبعة مستخدمًا جيدًا، وستة مستخدمًا كفئًا، وخمسة مستخدمًا متوسطًا. وقد تكون الدرجة بنصف مثل ستة ونصف. كثير من الجامعات تطلب من ستة إلى سبعة."]},
+{kick:["How Listening and Reading are marked","كيف يُصحَّح الاستماع والقراءة"],title:["Correct answers out of 40 → band","عدد الإجابات الصحيحة من 40 ← الدرجة"],table:1,
+ tip:["Each correct answer is 1 mark, and a wrong answer loses nothing, so never leave a gap. Academic Reading uses a similar table. These numbers are approximate.","كل إجابة صحيحة بدرجة واحدة، ولا يُخصم شيء على الإجابة الخاطئة، فلا تترك أي سؤال فارغًا. القراءة الأكاديمية لها جدول مشابه. هذه الأرقام تقريبية."],
+ say:["In Listening and Reading, each correct answer is one mark out of forty. For example, about thirty correct answers in Listening gives band seven. A wrong answer loses nothing, so never leave a question empty.","في الاستماع والقراءة، كل إجابة صحيحة بدرجة واحدة من أربعين. مثلًا، حوالي ثلاثين إجابة صحيحة في الاستماع تعطيك الدرجة سبعة. لا يُخصم شيء على الإجابة الخاطئة، فلا تترك أي سؤال فارغًا."]},
+{kick:["Your overall band score","درجتك الكلية"],title:["Average of the 4 skills, rounded to the nearest half","متوسط المهارات الأربع مقرّبًا لأقرب نصف درجة"],sum:1,
+ tip:["An average ending in .25 goes up to .5, and .75 goes up to the next whole band. Example: 6.75 → 7.0","المتوسط المنتهي بـ .25 يُقرّب إلى .5، والمنتهي بـ .75 يُقرّب إلى الدرجة الكاملة التالية. مثال: 6.75 ← 7.0"],
+ say:["Your overall band is the average of the four skills. For example, six point five, plus six point five, plus five, plus seven, makes twenty five. Divided by four, that is six point two five, which rounds up to six point five.","درجتك الكلية هي متوسط المهارات الأربع. مثلًا: ستة ونصف، زائد ستة ونصف، زائد خمسة، زائد سبعة، يساوي خمسة وعشرين. وعند القسمة على أربعة يكون الناتج ستة وربعًا، ويُقرّب إلى ستة ونصف."]},
+{hero:1,kick:["Your next step","خطوتك التالية"],title:["Practise every skill on Ashraf IELTS","تدرّب على كل المهارات في أشرف آيلتس"],
+ sub:["Listening tests · Reading tests · Writing feedback · Speaking practice. Know the test, practise every week, and your band will grow. Good luck!","اختبارات استماع · اختبارات قراءة · تصحيح الكتابة · تدريب على المحادثة. اعرف الاختبار وتدرّب كل أسبوع وسترتفع درجتك. بالتوفيق!"],
+ say:["Now you know the test. Practise every skill on Ashraf IELTS every week, and your band will grow. Good luck!","الآن أصبحت تعرف الاختبار. تدرّب على كل المهارات في أشرف آيلتس كل أسبوع، وسترتفع درجتك. بالتوفيق!"]}
+];
+const BANDS=[[9,"Expert user","مستخدم خبير"],[8,"Very good user","مستخدم جيد جدًا"],[7,"Good user","مستخدم جيد"],[6,"Competent user","مستخدم كفء"],[5,"Modest user","مستخدم متوسط"],[4,"Limited user","مستخدم محدود"]];
+let i=0,lang="both",voice="en",playing=false;
+try{const s=JSON.parse(localStorage.getItem("ieltsGuide")||"{}");if(s.lang)lang=s.lang;if(s.voice)voice=s.voice}catch(e){}
+const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function tx(pair,tag="div",cls=""){ // bilingual text block
+  const [en,ar]=pair;
+  if(lang==="en")return `<${tag} class="${cls}">${esc(en)}</${tag}>`;
+  if(lang==="ar")return `<${tag} class="${cls} ar" dir="rtl">${esc(ar)}</${tag}>`;
+  return `<${tag} class="${cls}">${esc(en)}<div class="ar-line" dir="rtl">${esc(ar)}</div></${tag}>`;
+}
+function render(){
+  const s=S[i],el=$("slide");el.className="slide reveal"+(s.hero?" hero":"");
+  el.style.setProperty("--k",s.k?`var(${s.k})`:"var(--green)");
+  let h=tx(s.kick,"div","kick")+tx(s.title,"h1");
+  if(s.sub)h+=tx(s.sub,"p","sub");
+  if(s.items)h+=`<div class="items" style="--cols:${s.cols}">`+s.items.map(it=>`<div class="item" style="--c:var(${it.c})">${tx(it.tg,"div","tg")}${it.h?tx(it.h,"h3"):""}${it.big?tx(it.big,"div","big"):""}${tx(it.p,"p")}</div>`).join("")+`</div>`;
+  if(s.bands)h+=`<div class="bands">`+BANDS.map(([n,e,a])=>`<div class="band"><b style="opacity:${.45+(n-4)*.11}">${n}</b>${tx([e,a],"span")}<i style="width:${(n/9*100).toFixed(0)}%"></i></div>`).join("")+`</div>`;
+  if(s.table)h+=`<div style="overflow-x:auto"><table><tr><th>${lang==="ar"?"الإجابات الصحيحة من 40":"Correct (out of 40)"}</th><th>${lang==="ar"?"درجة الاستماع":"Listening band"}</th></tr>`+[["39–40",9],["35–36",8],["30–31",7],["23–25",6],["16–17",5]].map(r=>`<tr><td>${r[0]}</td><td><b>${r[1]}</b></td></tr>`).join("")+`</table></div>`;
+  if(s.sum){const L=lang==="ar"?["الاستماع","القراءة","الكتابة","المحادثة","الدرجة الكلية"]:["Listening","Reading","Writing","Speaking","Overall band"];
+    h+=`<div class="sum" dir="ltr">${[6.5,6.5,"5.0","7.0"].map((v,k)=>`<span class="p"><small>${L[k]}</small>${v}</span>`).join('<span class="op">+</span>')}</div><div class="sum" dir="ltr"><span class="op">= 25 ÷ 4 = 6.25 →</span><span class="p res"><small>${L[4]}</small>6.5</span></div>`;}
+  if(s.tip)h+=tx(s.tip,"div","tip");
+  el.innerHTML=h; el.setAttribute("dir",lang==="ar"?"rtl":"ltr");
+  $("prog").style.width=((i+1)/S.length*100)+"%";
+  [...$("dots").children].forEach((d,k)=>d.setAttribute("aria-current",k===i));
+  $("cap").innerHTML=esc(s.say[voice==="ar"?1:0]); $("cap").dir=voice==="ar"?"rtl":"ltr";
+  $("cap").className="cap"+(voice==="ar"?" ar":"");
+}
+S.forEach((_,k)=>{const b=document.createElement("button");b.className="dot";b.setAttribute("aria-label","Slide "+(k+1));b.onclick=()=>go(k);$("dots").appendChild(b)});
+function save(){try{localStorage.setItem("ieltsGuide",JSON.stringify({lang,voice}))}catch(e){}}
+function setSeg(attr,val){document.querySelectorAll(`[data-${attr}]`).forEach(b=>b.setAttribute("aria-pressed",b.dataset[attr]===val))}
+document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{lang=b.dataset.lang;setSeg("lang",lang);save();render()});
+document.querySelectorAll("[data-voice]").forEach(b=>b.onclick=()=>{voice=b.dataset.voice;setSeg("voice",voice);save();checkVoice();if(playing){speak()}else render()});
+
+/* ---- speech ---- */
+const synth=window.speechSynthesis; let token=0;
+function pickVoice(code){const vs=synth?synth.getVoices():[];
+  const pref=code==="en"?["en-GB","en-US","en"]:["ar-SA","ar-AE","ar-EG","ar"];
+  for(const p of pref){const v=vs.find(v=>v.lang&&v.lang.replace("_","-").toLowerCase().startsWith(p.toLowerCase()));if(v)return v}return null}
+function checkVoice(){
+  if(!synth){$("vnote").textContent="This browser cannot read aloud. Try Chrome, Edge or Safari, or read the slides yourself.";return}
+  if(voice==="ar"&&synth.getVoices().length&&!pickVoice("ar"))$("vnote").textContent="No Arabic voice on this device. On a computer, open this page in Microsoft Edge, which has Arabic voices. On a phone, add an Arabic voice in the speech settings. لا يوجد صوت عربي على هذا الجهاز. افتح الصفحة في متصفح Microsoft Edge على الكمبيوتر.";
+  else $("vnote").textContent="The voice comes from your own device, so it sounds different on a phone, a laptop or a tablet.";
+}
+if(synth)synth.onvoiceschanged=checkVoice;
+function speak(){
+  const my=++token; if(synth)synth.cancel(); render();
+  if(!synth){return}
+  const text=S[i].say[voice==="ar"?1:0], parts=text.match(/[^.!؟?،]+[.!؟?]*/g)||[text], v=pickVoice(voice);
+  let k=0;
+  const nextPart=()=>{ if(my!==token||!playing)return;
+    if(k>=parts.length){ setTimeout(()=>{if(my!==token||!playing)return; if(i<S.length-1){i++;speak()}else stop()},900);return}
+    const u=new SpeechSynthesisUtterance(parts[k++].trim()); if(v)u.voice=v; u.lang=v?v.lang:(voice==="ar"?"ar-SA":"en-GB"); u.rate=voice==="ar"?0.95:0.92;
+    u.onend=nextPart; u.onerror=nextPart; synth.speak(u);};
+  nextPart();
+}
+function play(){playing=true;$("play").textContent="⏸ Pause";speak()}
+function stop(){playing=false;token++;if(synth)synth.cancel();$("play").textContent="▶ Play with voice"}
+$("play").onclick=()=>playing?stop():play();
+function go(n){i=Math.max(0,Math.min(S.length-1,n));playing?speak():render()}
+$("prev").onclick=()=>go(i-1);$("next").onclick=()=>go(i+1);
+document.addEventListener("keydown",e=>{if(e.target.closest("button")&&e.key===" ")return;if(e.key==="ArrowRight")go(i+1);if(e.key==="ArrowLeft")go(i-1)});
+setSeg("lang",lang);setSeg("voice",voice);render();checkVoice();
+</script>
+</body></html>
