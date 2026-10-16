@@ -20,7 +20,7 @@
   --bg:#0a1f18; --surface:#123026; --ink:#e8f1ec; --mute:#a3b8ad; --line:#24493b;
   --green:#4cc285; --deep:#082a20; --gold:#e3b341; --goldsoft:#2b2612; --goldline:#5c4b17;
   --c-listen:#7fa2ff; --c-read:#4cc285; --c-write:#ff8a57; --c-speak:#b794ff; color-scheme:dark}
-*{box-sizing:border-box}
+*{box-sizing:border-box}[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
 .wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
@@ -110,7 +110,7 @@ th{color:var(--mute);font-size:14px;text-transform:uppercase;letter-spacing:.06e
     <video controls preload="metadata" playsinline style="width:100%;border-radius:12px;background:#000" src="ielts-guide.mp4"></video>
     <p class="note" style="margin:0">The video has no sound. Use the talking slides above to hear each part read aloud. · الفيديو بدون صوت، استخدم الشرائح الناطقة في الأعلى للاستماع.</p>
   </section>
-  <p class="note"><a href="./" style="color:var(--green);font-weight:700">← Back to Ashraf IELTS Practice</a></p>
+  <p class="note" id="backlink"><a href="./" style="color:var(--green);font-weight:700">← Back to Ashraf IELTS Practice</a></p>
 </div>
 
 <script>
@@ -229,5 +229,6 @@ function go(n){i=Math.max(0,Math.min(S.length-1,n));playing?speak():render()}
 $("prev").onclick=()=>go(i-1);$("next").onclick=()=>go(i+1);
 document.addEventListener("keydown",e=>{if(e.target.closest("button")&&e.key===" ")return;if(e.key==="ArrowRight")go(i+1);if(e.key==="ArrowLeft")go(i-1)});
 setSeg("lang",lang);setSeg("voice",voice);render();checkVoice();
+if(/embed=1/.test(location.search)||window.self!==window.top){const b=document.getElementById("backlink");if(b)b.hidden=true}
 </script>
 </body></html>
