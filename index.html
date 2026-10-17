@@ -262,15 +262,16 @@ function practiceAdmin(){
  const all=practiceItems(),list=all.filter(t=>t.cat===pracSkill).sort(pracSort);
  document.getElementById('content').innerHTML=`<div class="head"><div><h1>Practice</h1><p class="subtitle">Upload full sample tests or single parts (e.g. Reading Passage 2) for students to practise freely. Practice is not marked and can be repeated.</p></div><button class="btn" id="addPractice">+ Upload practice</button></div>
  <div class="chips" style="margin-top:14px">${CATS.map(c=>`<button class="chip ${pracSkill===c?'on':''}" data-psk="${esc(c)}">${c}<span class="n">${all.filter(t=>t.cat===c).length}</span></button>`).join('')}</div>
- <div class="card" style="margin-top:10px">${list.length?list.map(t=>`<div class="librow"><div style="min-width:0"><b>${esc(t.title)}</b><div class="meta">${tag(t.part||PRACTICE_OTHER)}<span>${t.resourceName?'File: '+esc(t.resourceName):'No file attached'}</span></div></div>
+ <div class="card" style="margin-top:10px">${list.length?list.map(t=>`<div class="librow"><div style="min-width:0"><b>${esc(t.title)}</b><div class="meta">${tag(t.part||PRACTICE_OTHER)}<span>${t.resourceName?'File: '+esc(t.resourceName):'No file attached'}</span>${(()=>{const c=practiceCopy(t.id);return c&&c.assign?.length?`<span class="tag" title="${esc(assignSummary(c))}">Assigned</span>`:''})()}</div></div>
   <div class="acts"><button class="btn secondary tiny" data-ppreview="${t.id}">Preview</button><button class="switch ${t.active?'on':''}" data-ptoggle="${t.id}" title="${t.active?'Click to hide from students':'Click to show to students'}"><i></i>${t.active?'Visible':'Hidden'}</button>
-  <details class="more"><summary aria-label="More actions for ${esc(t.title)}">⋯</summary><div class="menu"><button data-pedit="${t.id}">Rename / change part</button><button data-preplace="${t.id}">Replace file</button><button class="danger-item" data-pdelete="${t.id}">Delete</button></div></details></div></div>`).join('')
+  <details class="more"><summary aria-label="More actions for ${esc(t.title)}">⋯</summary><div class="menu"><button data-passign="${t.id}">Assign to trainees</button><button data-pedit="${t.id}">Rename / change part</button><button data-preplace="${t.id}">Replace file</button><button class="danger-item" data-pdelete="${t.id}">Delete</button></div></details></div></div>`).join('')
   :`<div class="empty">No ${esc(pracSkill)} practice yet. Click Upload practice to add one.</div>`}</div>`;
  document.querySelectorAll('[data-psk]').forEach(b=>b.onclick=()=>{pracSkill=b.dataset.psk;practiceAdmin()});
  document.getElementById('addPractice').onclick=uploadPractice;
  document.querySelectorAll('details.more').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('details.more[open]').forEach(o=>{if(o!==d)o.open=false})}));
  document.querySelectorAll('[data-ppreview]').forEach(b=>b.onclick=()=>openPractice(b.dataset.ppreview));
  document.querySelectorAll('[data-ptoggle]').forEach(b=>b.onclick=async()=>{const t=byId(b.dataset.ptoggle);b.disabled=true;try{await updateDoc(doc(fs,'tests',t.id),{active:!t.active});await refresh();practiceAdmin()}catch(e){message(e);b.disabled=false}});
+ document.querySelectorAll('[data-passign]').forEach(b=>b.onclick=()=>assignPractice(b.dataset.passign));
  document.querySelectorAll('[data-pedit]').forEach(b=>b.onclick=()=>editPractice(b.dataset.pedit));
  document.querySelectorAll('[data-preplace]').forEach(b=>b.onclick=()=>replacePracticeFile(b.dataset.preplace));
  document.querySelectorAll('[data-pdelete]').forEach(b=>b.onclick=async()=>{const t=byId(b.dataset.pdelete);if(!await ask(`Delete the practice “${t.title}”? Students will no longer see it.`,{ok:'Delete',danger:true}))return;try{await deleteDoc(doc(fs,'tests',t.id));await refresh();practiceAdmin();toast('Practice deleted.',null,'ok')}catch(e){message(e)}});
@@ -290,6 +291,13 @@ function uploadPractice(){
    if(ok){pracSkill=cat;closeModal();await refresh();practiceAdmin()}else{btn.disabled=false;btn.textContent='Upload'}
    alert(`${ok} of ${files.length} practice file(s) uploaded${ok?(active?' and visible to students.':' (hidden – switch on Visible when ready).'):'.'}`+(failed.length?'\nFailed:\n'+failed.join('\n'):''))}finally{busy=false}}
 }
+// Assigning a practice item creates (once) a linked copy in the Test Library that uses the same file.
+// The copy follows the normal assignment rules, so results are recorded and appear in Marking and Reports.
+const practiceCopy=id=>tests.find(x=>!x.practice&&x.fromPractice===id);
+async function assignPractice(id){const t=byId(id);if(!t)return;if(!t.resourcePath)return alert('Attach a file to this practice before assigning it.');
+ let c=practiceCopy(id);
+ if(!c){try{const nid=doc(collection(fs,'tests')).id;await setDoc(doc(fs,'tests',nid),{cat:t.cat,title:t.title,duration:t.duration||60,active:true,assign:[],questions:[],prompt:'',resourcePath:t.resourcePath,resourceName:t.resourceName||'',resourceURL:t.resourceURL||'',createdAt:new Date().toISOString(),createdByInstructor:true,fromPractice:id});await refresh();c=byId(nid)}catch(e){return message(e)}}
+ assignTest(c.id)}
 function editPractice(id){const t=byId(id);showModal(`<h2>Rename practice</h2><form id="pracEdit"><label class="field">Name<input name="title" value="${esc(t.title)}" required maxlength="150"></label><label class="field">IELTS section<select name="cat">${CATS.map(c=>`<option ${c===t.cat?'selected':''}>${c}</option>`).join('')}</select></label><label class="field">Part<select name="part"></select></label><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn">Save</button></div></form>`);
  const f=document.getElementById('pracEdit'),fillParts=()=>{const p=partsOf(f.cat.value);f.part.innerHTML=p.map(x=>`<option ${x===t.part?'selected':''}>${esc(x)}</option>`).join('')};fillParts();f.cat.onchange=fillParts;
  document.getElementById('cancelModal').onclick=closeModal;
