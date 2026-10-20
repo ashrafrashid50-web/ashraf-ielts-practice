@@ -28,6 +28,13 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // ---------- trainee passwords (instructor only) ----------
+    // A copy of each trainee's password so the instructor can look it up later.
+    // Trainees can never read this collection — not even their own document.
+    match /traineeSecrets/{uid} {
+      allow read, write: if isAdmin();
+    }
+
     // ---------- tests ----------
     match /tests/{testId} {
       allow read: if isActive();
