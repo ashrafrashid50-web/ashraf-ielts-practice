@@ -457,24 +457,29 @@ function traineePage(){const u=users.find(x=>x.id===profileId);if(!u){page='user
  document.getElementById('backList').onclick=()=>{page='users';render()};
  document.getElementById('chgGroup').onclick=()=>groupModal([u.id]);
  wireGrades()}
-function resetTraineePassword(id){const u=users.find(x=>x.id===id);if(!u)return;const saved=secrets[id]?.password||'';
- showModal(`<h2>Reset password</h2><p class="muted">${esc(u.name)} · <b>${esc(u.username||'')}</b></p><form id="pwResetForm" autocomplete="off">${saved?'<p class="small muted">The current password is saved, so you only need to choose a new one.</p>':`<label class="field">Current password <span class="small muted">(ask the trainee if you don’t know it)</span><span class="pwwrap"><input name="cur" type="password" required autocomplete="off" autocapitalize="off" spellcheck="false"><button type="button" class="eyebtn" data-pweye>👁 Show</button></span></label>`}${pwField('np','New password (at least 6 characters)')}<p class="error" id="pwResetErr" role="alert"></p><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn" id="pwResetBtn">Reset password</button></div></form>`);
+const RESET_URL='https://us-central1-ashraf-ielts-practice.cloudfunctions.net/resetTraineePassword';
+async function serverReset(uid,password){let r;try{r=await fetch(RESET_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await current.getIdToken()},body:JSON.stringify({uid,password})})}catch(x){return {offline:true}}
+ let j={};try{j=await r.json()}catch{}if(r.status===404&&!j.error)return {offline:true};if(!r.ok)throw new Error(j.error||'The password could not be reset.');return {ok:true}}
+async function clientReset(u,cur,np){const {initializeApp:initSecondary,deleteApp}=await import('https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js');const secondary=initSecondary(firebaseConfig,'trainee-reset-'+Date.now());const sa=getAuth(secondary);
+ try{const cred=await signInWithEmailAndPassword(sa,u.email||usernameEmail(u.username),cur);await updatePassword(cred.user,np);await signOut(sa)}finally{try{await deleteApp(secondary)}catch{}}
+ try{await setDoc(doc(fs,'traineeSecrets',u.id),{username:u.username||'',password:np,updatedAt:serverTimestamp()})}catch(x){return false}return true}
+function resetTraineePassword(id){const u=users.find(x=>x.id===id);if(!u)return;const saved=secrets[id]?.password||'';let needCur=false;
+ showModal(`<h2>Reset password</h2><p class="muted">${esc(u.name)} · <b>${esc(u.username||'')}</b></p><form id="pwResetForm" autocomplete="off">${pwField('np','New password (at least 6 characters)')}<div id="curBox"></div><p class="error" id="pwResetErr" role="alert"></p><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn" id="pwResetBtn">Reset password</button></div></form>`);
  wirePw();document.getElementById('cancelModal').onclick=closeModal;
+ const done=async(np,kept)=>{await refresh();render();
+  showModal(`<h2>Password reset</h2><p class="muted">${esc(u.name)} can sign in with the new password now. The old one no longer works.</p><div class="credbox">Username: <code>${esc(u.username||'')}</code><br>New password: <code>${esc(np)}</code></div>${kept?'':'<p class="small" style="color:#b03a2e">The new password could not be saved for later. Write it down now.</p>'}<div class="row spread"><button type="button" class="btn secondary" id="copyCred">Copy details</button><button type="button" class="btn" id="cancelModal">Done</button></div>`);
+  document.getElementById('cancelModal').onclick=closeModal;document.getElementById('copyCred').onclick=()=>copyText(`Ashraf IELTS Practice\nUsername: ${u.username||''}\nPassword: ${np}`)};
  document.getElementById('pwResetForm').onsubmit=async e=>{e.preventDefault();const f=e.target,btn=document.getElementById('pwResetBtn'),err=document.getElementById('pwResetErr');err.textContent='';
-  const cur=saved||f.cur.value, np=f.np.value; if(np.length<6){err.textContent='The new password must be at least 6 characters.';return}
-  if(np===cur){err.textContent='The new password must be different from the current one.';return}
-  btn.disabled=true;btn.textContent='Resetting…';let secondary=null;
-  try{const {initializeApp:initSecondary,deleteApp}=await import('https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js');
-   secondary=initSecondary(firebaseConfig,'trainee-reset-'+Date.now());const sa=getAuth(secondary);
-   const cred=await signInWithEmailAndPassword(sa,u.email||usernameEmail(u.username),cur);
-   await updatePassword(cred.user,np);await signOut(sa);await deleteApp(secondary);secondary=null;
-   let kept=true;try{await setDoc(doc(fs,'traineeSecrets',id),{username:u.username||'',password:np,updatedAt:serverTimestamp()})}catch(x){kept=false}
-   await refresh();render();
-   showModal(`<h2>Password reset</h2><p class="muted">Give the new details to ${esc(u.name)} privately.</p><div class="credbox">Username: <code>${esc(u.username||'')}</code><br>New password: <code>${esc(np)}</code></div>${kept?'':'<p class="small" style="color:#b03a2e">The new password could not be saved for later. Write it down now.</p>'}<div class="row spread"><button type="button" class="btn secondary" id="copyCred">Copy details</button><button type="button" class="btn" id="cancelModal">Done</button></div>`);
-   document.getElementById('cancelModal').onclick=closeModal;document.getElementById('copyCred').onclick=()=>copyText(`Ashraf IELTS Practice\nUsername: ${u.username||''}\nPassword: ${np}`);
+  const np=f.np.value;if(np.length<6){err.textContent='The new password must be at least 6 characters.';return}
+  btn.disabled=true;btn.textContent='Resetting…';
+  try{
+   if(!needCur){const r=await serverReset(id,np);if(r.ok)return done(np,true);
+    if(!saved){needCur=true;document.getElementById('curBox').innerHTML=`<label class="field">Current password <span class="small muted">(the reset service isn’t available, so the current password is needed)</span><span class="pwwrap"><input name="cur" type="password" required autocomplete="off" autocapitalize="off" spellcheck="false"><button type="button" class="eyebtn" data-pweye>👁 Show</button></span></label>`;wirePw();f.cur.focus();btn.disabled=false;btn.textContent='Reset password';return}}
+   const cur=needCur?f.cur.value:saved;if(np===cur){throw Object.assign(new Error('same'),{code:'same'})}
+   const kept=await clientReset(u,cur,np);return done(np,kept);
   }catch(x){console.warn(x);const c=String(x&&x.code||'');
-   err.textContent=/wrong-password|invalid-credential|invalid-login/.test(c)?(saved?'The saved password no longer works (it may have been changed). Enter the current password instead.':'The current password is not correct. Check it with the trainee and try again.'):/too-many-requests/.test(c)?'Too many attempts. Please wait a few minutes and try again.':friendlyError(x);
-   btn.disabled=false;btn.textContent='Reset password';if(secondary){try{await signOut(getAuth(secondary))}catch{}}}}}
+   err.textContent=c==='same'?'The new password must be different from the current one.':/wrong-password|invalid-credential|invalid-login/.test(c)?'The current password is not correct.':/too-many-requests/.test(c)?'Too many attempts. Please wait a few minutes and try again.':(x&&x.message&&!c?x.message:friendlyError(x));
+   btn.disabled=false;btn.textContent='Reset password'}}}
 function openUser(){showModal(`<h2>Create trainee</h2><p class="muted">The trainee can sign in straight away with this username and password. You stay signed in.</p><form id="newUserForm" autocomplete="off"><label class="field">Full name<input name="name" required autocomplete="off"></label><label class="field">Username<input name="username" type="text" minlength="3" maxlength="30" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,29}" required autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly')" placeholder="e.g. faisal123"></label>${pwField('password','Password (at least 6 characters)')}<label class="field">Group <span class="small muted">(optional — you can add it later)</span><input name="group" list="grpList" autocomplete="off" placeholder="e.g. Morning class">${groupList()}</label><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn" id="createBtn">Create</button></div></form>`);
  wirePw();
  // Stop the browser from filling the instructor's own saved login into this form.
