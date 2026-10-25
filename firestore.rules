@@ -41,12 +41,6 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    // ---------- AI-suggested marks (drafts) ----------
-    // Written by the suggestWritingMarks Cloud Function; only the instructor can read them.
-    match /aiDrafts/{subId} {
-      allow read, write: if isAdmin();
-    }
-
     // ---------- submissions ----------
     // Document id = <studentUid>_<testId>. Students create once; only the instructor edits/grades.
     match /submissions/{subId} {
