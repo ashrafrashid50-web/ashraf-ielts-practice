@@ -204,6 +204,7 @@ const ICON={
  dashboard:svg('<rect x="3" y="3" width="7" height="8" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="15" width="7" height="6" rx="1.5"/>'),
  users:svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c2 .7 3.2 2.4 3.5 5.2"/>'),
  tests:svg('<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8.5 8h7M8.5 12h5"/>'),
+ grade12:svg('<path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h6"/>'),
  practice:svg('<path d="M12 3 3 8l9 5 9-5z"/><path d="M7 10.5V16c0 1.4 2.2 3 5 3s5-1.6 5-3v-5.5"/><path d="M21 8v6"/>'),
  assignments:svg('<path d="M9 4h6v3H9z"/><path d="M15 5.5h2.5A1.5 1.5 0 0 1 19 7v13a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 20V7a1.5 1.5 0 0 1 1.5-1.5H9"/><path d="m9 14 2 2 4-4"/>'),
  grading:svg('<path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="m14 8 3 3"/>'),
@@ -224,7 +225,7 @@ const ICON={
 };
 const displayName=()=>(profile?.name||'').trim();
 const initials=()=>{const n=displayName()||current?.email||'?';const p=n.replace(/@.*/,'').split(/[\s._-]+/).filter(Boolean);return ((p[0]?.[0]||'?')+(p.length>1?p[p.length-1][0]:'')).toUpperCase()};
-const PAGE_TITLE={dashboard:['Overview','My Dashboard'],users:['Trainees','Trainees'],tests:['Test Library','My Tests'],practice:['Practice','Practice'],assignments:['Assignments','Assignments'],grading:['Marking','Marking'],trainee:['Trainee profile','Trainee profile'],reports:['Reports','My Results'],live:['Live classes','Live class'],guide:['IELTS Guide','IELTS Guide'],'html-exam':['Test','Test'],'test-taking':['Test','Test']};
+const PAGE_TITLE={dashboard:['Overview','My Dashboard'],users:['Trainees','Trainees'],tests:['Test Library','My Tests'],practice:['Practice','Practice'],grade12:['Grade 12','Grade 12'],assignments:['Assignments','Assignments'],grading:['Marking','Marking'],trainee:['Trainee profile','Trainee profile'],reports:['Reports','My Results'],live:['Live classes','Live class'],guide:['IELTS Guide','IELTS Guide'],'html-exam':['Test','Test'],'test-taking':['Test','Test']};
 function friendlyError(e){const c=String(e?.code||'');
  if(/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c))return 'Wrong username or password. Please try again.';
  if(/too-many-requests/.test(c))return 'Too many attempts. Please wait a few minutes and try again.';
@@ -260,21 +261,35 @@ async function refresh(){if(!current)return;const [u,t,s]=await Promise.all([isA
 // Assignments or Marking, and practice attempts are never saved as submissions (unlimited retakes).
 const PRACTICE_PARTS={'Listening':['Full test','Part 1','Part 2','Part 3','Part 4'],'Reading':['Full test','Passage 1','Passage 2','Passage 3'],'Writing Task 1':['Practice task','Model answer'],'Writing Task 2':['Practice task','Model answer'],'Speaking':['Full test','Part 1','Part 2','Part 3']};
 const PRACTICE_OTHER='Sample / other';
-let pracSkill='Listening',pracStuSkill='All';
-const practiceItems=()=>tests.filter(t=>t.practice===true);
-const partsOf=c=>[...(PRACTICE_PARTS[c]||[]),PRACTICE_OTHER];
+// Practice areas: the IELTS Practice page and the Grade 12 page share the same code; items carry area:'g12' for Grade 12.
+const G12_PARTS={'Reading':['EOT sample test','Vocabulary','Grammar','Reading'],'Writing Task 2':['Writing task','Model answer']};
+const AREAS={practice:{page:'practice',title:'Practice',noun:'practice',cats:null,parts:PRACTICE_PARTS,label:c=>c,
+  adminSub:'Upload full sample tests or single parts (e.g. Reading Passage 2) for students to practise freely. Practice is not marked and can be repeated.',
+  stuSub:'Sample tests and single parts to practise on your own. These are not marked – try them as many times as you like.',sectionLabel:'IELTS section'},
+ g12:{page:'grade12',title:'Grade 12',noun:'Grade 12 test',cats:['Reading','Writing Task 2'],parts:G12_PARTS,label:c=>({'Reading':'Reading','Writing Task 2':'Writing'}[c]||c),
+  adminSub:'Upload Grade 12 sample tests and materials. Students can practise them as often as they like (not recorded). To record scores, use ⋯ → Assign to trainees.',
+  stuSub:'Grade 12 sample tests and materials. Practise as many times as you like.',sectionLabel:'Section'}};
+let PA='practice';const AR=()=>AREAS[PA],ACATS=()=>AR().cats||CATS,CL=c=>AR().label(c);
+let pracSkill='Listening',pracStuSkill='All',g12Skill='Reading',g12StuSkill='All';
+const practiceItems=()=>tests.filter(t=>t.practice===true&&(t.area||'practice')===PA);
+const partsOf=c=>[...(AR().parts[c]||[]),PRACTICE_OTHER];
 const pracSort=(a,b)=>{const p=partsOf(a.cat);return (p.indexOf(a.part)<0?99:p.indexOf(a.part))-(p.indexOf(b.part)<0?99:p.indexOf(b.part))||(a.createdAt||'').localeCompare(b.createdAt||'')};
 const isHtmlRes=t=>/\.html?$/i.test(t.resourceName||'');
-function practicePage(){isAdmin()?practiceAdmin():practiceStudent()}
+function practicePage(){if(PA!=='practice'){PA='practice'}isAdmin()?practiceAdmin():practiceStudent()}
+function grade12Page(){if(PA!=='g12'){PA='g12'}isAdmin()?practiceAdmin():practiceStudent()}
+// keep each area's selected tab separately
+function _skillGet(stu){return PA==='g12'?(stu?g12StuSkill:g12Skill):(stu?pracStuSkill:pracSkill)}
+function _skillSet(v,stu){if(PA==='g12'){stu?g12StuSkill=v:g12Skill=v}else{stu?pracStuSkill=v:pracSkill=v}}
 function practiceAdmin(){
+ if(!ACATS().includes(_skillGet(false)))_skillSet(ACATS()[0],false);const pracSkill=_skillGet(false),A=AR();
  const all=practiceItems(),list=all.filter(t=>t.cat===pracSkill).sort(pracSort);
- document.getElementById('content').innerHTML=`<div class="head"><div><h1>Practice</h1><p class="subtitle">Upload full sample tests or single parts (e.g. Reading Passage 2) for students to practise freely. Practice is not marked and can be repeated.</p></div><div class="row">${list.length?`<button class="btn secondary" id="pracVisAll">${list.some(t=>t.active)?'Hide all':'Show all'}</button><button class="btn secondary" id="pracDelAll" style="color:#b42318">Delete all</button>`:''}<button class="btn" id="addPractice">+ Upload practice</button></div></div>
- <div class="chips" style="margin-top:14px">${CATS.map(c=>`<button class="chip ${pracSkill===c?'on':''}" data-psk="${esc(c)}">${c}<span class="n">${all.filter(t=>t.cat===c).length}</span></button>`).join('')}</div>
+ document.getElementById('content').innerHTML=`<div class="head"><div><h1>${A.title}</h1><p class="subtitle">${esc(A.adminSub)}</p></div><div class="row">${list.length?`<button class="btn secondary" id="pracVisAll">${list.some(t=>t.active)?'Hide all':'Show all'}</button><button class="btn secondary" id="pracDelAll" style="color:#b42318">Delete all</button>`:''}<button class="btn" id="addPractice">+ Upload ${PA==='g12'?'test':'practice'}</button></div></div>
+ <div class="chips" style="margin-top:14px">${ACATS().map(c=>`<button class="chip ${pracSkill===c?'on':''}" data-psk="${esc(c)}">${esc(CL(c))}<span class="n">${all.filter(t=>t.cat===c).length}</span></button>`).join('')}</div>
  <div class="card" style="margin-top:10px">${list.length?list.map(t=>`<div class="librow"><div style="min-width:0"><b>${esc(t.title)}</b><div class="meta">${tag(t.part||PRACTICE_OTHER)}<span>${t.resourceName?'File: '+esc(t.resourceName):'No file attached'}</span>${(()=>{const c=practiceCopy(t.id);return c&&c.assign?.length?`<span class="tag" title="${esc(assignSummary(c))}">Assigned</span>`:''})()}</div></div>
   <div class="acts"><button class="btn secondary tiny" data-ppreview="${t.id}">Preview</button><button class="switch ${t.active?'on':''}" data-ptoggle="${t.id}" title="${t.active?'Click to hide from students':'Click to show to students'}"><i></i>${t.active?'Visible':'Hidden'}</button>
   <details class="more"><summary aria-label="More actions for ${esc(t.title)}">⋯</summary><div class="menu"><button data-passign="${t.id}">Assign to trainees</button><button data-pedit="${t.id}">Rename / change part</button><button data-preplace="${t.id}">Replace file</button><button class="danger-item" data-pdelete="${t.id}">Delete</button></div></details></div></div>`).join('')
-  :`<div class="empty">No ${esc(pracSkill)} practice yet. Click Upload practice to add one.</div>`}</div>`;
- document.querySelectorAll('[data-psk]').forEach(b=>b.onclick=()=>{pracSkill=b.dataset.psk;practiceAdmin()});
+  :`<div class="empty">No ${esc(CL(pracSkill))} items yet. Click Upload to add one.</div>`}</div>`;
+ document.querySelectorAll('[data-psk]').forEach(b=>b.onclick=()=>{_skillSet(b.dataset.psk,false);practiceAdmin()});
  document.getElementById('addPractice').onclick=uploadPractice;
  const vis=document.getElementById('pracVisAll');if(vis)vis.onclick=async()=>{const on=!list.some(t=>t.active);if(!await ask(`${on?'Show':'Hide'} all ${list.length} ${pracSkill} practice item(s) ${on?'to':'from'} students?`,{ok:on?'Show all':'Hide all'}))return;vis.disabled=true;try{await Promise.all(list.filter(t=>t.active!==on).map(t=>updateDoc(doc(fs,'tests',t.id),{active:on})));await refresh();practiceAdmin();toast(`All ${pracSkill} practice ${on?'shown':'hidden'}.`,null,'ok')}catch(e){message(e);vis.disabled=false}};
  const del=document.getElementById('pracDelAll');if(del)del.onclick=async()=>{if(!await ask(`Delete ALL ${list.length} ${pracSkill} practice item(s)? Students will no longer see them. This cannot be undone. Tests you already assigned from them stay in the Test Library.`,{ok:'Delete all',danger:true}))return;del.disabled=true;let ok=0;try{for(const t of list){await deleteDoc(doc(fs,'tests',t.id));ok++}}catch(e){message(e)}await refresh();practiceAdmin();toast(`${ok} practice item(s) deleted.`,null,'ok')};
@@ -289,7 +304,7 @@ function practiceAdmin(){
 const PRAC_ACCEPT='.html,.htm,.pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.mp3,.wav,.m4a';
 async function uploadPracticeFile(id,file){const path=`resources/${id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;await uploadBytes(ref(storage,path),file,{contentType:/\.html?$/i.test(file.name)?'text/html':(file.type||'application/octet-stream')});let resourceURL='';try{resourceURL=await getDownloadURL(ref(storage,path))}catch(e){console.warn('Download URL unavailable',e)}return {resourcePath:path,resourceName:file.name,resourceURL}}
 function uploadPractice(){
- showModal(`<h2>Upload Practice</h2><form id="pracForm"><label class="field">IELTS section<select name="cat">${CATS.map(c=>`<option ${c===pracSkill?'selected':''}>${c}</option>`).join('')}</select></label><label class="field">Part<select name="part"></select></label><label class="field">Name (optional for several files)<input name="title" placeholder="e.g. Cambridge 18 Test 2 – Passage 3"></label><label class="field">Files — HTML tests, PDF, Word, images or audio (several allowed)<input type="file" name="files" multiple accept="${PRAC_ACCEPT}" required></label><label style="display:flex;gap:8px;align-items:center;margin:6px 0 12px"><input type="checkbox" name="show" checked style="width:auto"> Show to all students straight away</label><p class="small muted">Practice is open to every trainee, is not marked and can be repeated. Each file must be 100 MB or smaller.</p><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn" id="pracSubmit">Upload</button></div></form>`);
+ const pracSkill=_skillGet(false);showModal(`<h2>Upload ${PA==='g12'?'Grade 12 test':'Practice'}</h2><form id="pracForm"><label class="field">${AR().sectionLabel}<select name="cat">${ACATS().map(c=>`<option value="${esc(c)}" ${c===pracSkill?'selected':''}>${esc(CL(c))}</option>`).join('')}</select></label><label class="field">Part<select name="part"></select></label><label class="field">Name (optional for several files)<input name="title" placeholder="${PA==='g12'?'e.g. Grade 12 EOT Sample A':'e.g. Cambridge 18 Test 2 – Passage 3'}"></label><label class="field">Files — HTML tests, PDF, Word, images or audio (several allowed)<input type="file" name="files" multiple accept="${PRAC_ACCEPT}" required></label><label style="display:flex;gap:8px;align-items:center;margin:6px 0 12px"><input type="checkbox" name="show" checked style="width:auto"> Show to all students straight away</label><p class="small muted">${PA==='g12'?'Grade 12 items are open to every trainee and are not marked unless you assign them.':'Practice is open to every trainee, is not marked and can be repeated.'} Each file must be 100 MB or smaller.</p><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn" id="pracSubmit">Upload</button></div></form>`);
  const f=document.getElementById('pracForm'),fillParts=()=>{f.part.innerHTML=partsOf(f.cat.value).map(p=>`<option>${esc(p)}</option>`).join('')};fillParts();f.cat.onchange=fillParts;
  document.getElementById('cancelModal').onclick=closeModal;
  f.onsubmit=async e=>{e.preventDefault();if(busy)return;const files=[...f.files.files],btn=document.getElementById('pracSubmit'),name=f.title.value.trim(),cat=f.cat.value,part=f.part.value,active=f.show.checked;
@@ -297,8 +312,8 @@ function uploadPractice(){
   busy=true;btn.disabled=true;let ok=0,failed=[];
   try{for(let i=0;i<files.length;i++){const file=files[i];btn.textContent=`Uploading ${i+1} of ${files.length}…`;try{const id=doc(collection(fs,'tests')).id,res=await uploadPracticeFile(id,file),base=file.name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').trim();
     const title=files.length===1?(name||base):(name?`${name} ${i+1} - ${base}`:base);
-    await setDoc(doc(fs,'tests',id),{practice:true,cat,part,title,active,assign:[],questions:[],prompt:'',duration:60,...res,createdAt:new Date(Date.now()+i).toISOString(),createdByInstructor:true});ok++}catch(err){failed.push(`${file.name}: ${err.message||err}`)}}
-   if(ok){pracSkill=cat;closeModal();await refresh();practiceAdmin()}else{btn.disabled=false;btn.textContent='Upload'}
+    await setDoc(doc(fs,'tests',id),{practice:true,...(PA==='g12'?{area:'g12'}:{}),cat,part,title,active,assign:[],questions:[],prompt:'',duration:60,...res,createdAt:new Date(Date.now()+i).toISOString(),createdByInstructor:true});ok++}catch(err){failed.push(`${file.name}: ${err.message||err}`)}}
+   if(ok){_skillSet(cat,false);closeModal();await refresh();practiceAdmin()}else{btn.disabled=false;btn.textContent='Upload'}
    alert(`${ok} of ${files.length} practice file(s) uploaded${ok?(active?' and visible to students.':' (hidden – switch on Visible when ready).'):'.'}`+(failed.length?'\nFailed:\n'+failed.join('\n'):''))}finally{busy=false}}
 }
 // Assigning a practice item creates (once) a linked copy in the Test Library that uses the same file.
@@ -308,20 +323,20 @@ async function assignPractice(id){const t=byId(id);if(!t)return;if(!t.resourcePa
  let c=practiceCopy(id);
  if(!c){try{const nid=doc(collection(fs,'tests')).id;await setDoc(doc(fs,'tests',nid),{cat:t.cat,title:t.title,duration:t.duration||60,active:true,assign:[],questions:[],prompt:'',resourcePath:t.resourcePath,resourceName:t.resourceName||'',resourceURL:t.resourceURL||'',createdAt:new Date().toISOString(),createdByInstructor:true,fromPractice:id});await refresh();c=byId(nid)}catch(e){return message(e)}}
  assignTest(c.id)}
-function editPractice(id){const t=byId(id);showModal(`<h2>Rename practice</h2><form id="pracEdit"><label class="field">Name<input name="title" value="${esc(t.title)}" required maxlength="150"></label><label class="field">IELTS section<select name="cat">${CATS.map(c=>`<option ${c===t.cat?'selected':''}>${c}</option>`).join('')}</select></label><label class="field">Part<select name="part"></select></label><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn">Save</button></div></form>`);
+function editPractice(id){const t=byId(id);showModal(`<h2>Rename practice</h2><form id="pracEdit"><label class="field">Name<input name="title" value="${esc(t.title)}" required maxlength="150"></label><label class="field">${AR().sectionLabel}<select name="cat">${ACATS().map(c=>`<option value="${esc(c)}" ${c===t.cat?'selected':''}>${esc(CL(c))}</option>`).join('')}</select></label><label class="field">Part<select name="part"></select></label><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn">Save</button></div></form>`);
  const f=document.getElementById('pracEdit'),fillParts=()=>{const p=partsOf(f.cat.value);f.part.innerHTML=p.map(x=>`<option ${x===t.part?'selected':''}>${esc(x)}</option>`).join('')};fillParts();f.cat.onchange=fillParts;
  document.getElementById('cancelModal').onclick=closeModal;
- f.onsubmit=async e=>{e.preventDefault();const title=f.title.value.trim();if(!title)return alert('Enter a name.');try{await updateDoc(doc(fs,'tests',id),{title,cat:f.cat.value,part:f.part.value});pracSkill=f.cat.value;closeModal();await refresh();practiceAdmin();toast('Practice saved.',null,'ok')}catch(err){message(err)}}}
+ f.onsubmit=async e=>{e.preventDefault();const title=f.title.value.trim();if(!title)return alert('Enter a name.');try{await updateDoc(doc(fs,'tests',id),{title,cat:f.cat.value,part:f.part.value});_skillSet(f.cat.value,false);closeModal();await refresh();practiceAdmin();toast('Practice saved.',null,'ok')}catch(err){message(err)}}}
 function replacePracticeFile(id){const t=byId(id);showModal(`<h2>Replace file</h2><p class="muted">${esc(t.title)}<br><span class="small">Current file: ${esc(t.resourceName||'none')}</span></p><form id="pracRep"><label class="field">New file<input type="file" name="file" accept="${PRAC_ACCEPT}" required></label><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn" id="repBtn">Replace</button></div></form>`);
  document.getElementById('cancelModal').onclick=closeModal;
  document.getElementById('pracRep').onsubmit=async e=>{e.preventDefault();const file=e.target.file.files[0];if(!file)return;if(file.size>100*1024*1024)return alert('File exceeds 100 MB.');const btn=document.getElementById('repBtn');btn.disabled=true;btn.textContent='Uploading…';try{await updateDoc(doc(fs,'tests',id),await uploadPracticeFile(id,file));closeModal();await refresh();practiceAdmin();toast('File replaced.',null,'ok')}catch(err){message(err);btn.disabled=false;btn.textContent='Replace'}}}
 function practiceStudent(){
- const all=practiceItems().filter(t=>t.active),skills=['All',...CATS],show=pracStuSkill==='All'?CATS:[pracStuSkill];
- document.getElementById('content').innerHTML=`<div class="head"><div><h1>Practice</h1><p class="subtitle">Sample tests and single parts to practise on your own. These are not marked – try them as many times as you like.</p></div></div>
- <div class="chips" style="margin-top:14px">${skills.map(k=>`<button class="chip ${pracStuSkill===k?'on':''}" data-pss="${esc(k)}">${k}<span class="n">${k==='All'?all.length:all.filter(t=>t.cat===k).length}</span></button>`).join('')}</div>
+ const pracStuSkill=_skillGet(true),A=AR();const all=practiceItems().filter(t=>t.active),skills=['All',...ACATS()],show=pracStuSkill==='All'?ACATS():[pracStuSkill];
+ document.getElementById('content').innerHTML=`<div class="head"><div><h1>${A.title}</h1><p class="subtitle">${esc(A.stuSub)}</p></div></div>
+ <div class="chips" style="margin-top:14px">${skills.map(k=>`<button class="chip ${pracStuSkill===k?'on':''}" data-pss="${esc(k)}">${esc(k==='All'?k:CL(k))}<span class="n">${k==='All'?all.length:all.filter(t=>t.cat===k).length}</span></button>`).join('')}</div>
  ${all.length?show.map(c=>{const list=all.filter(t=>t.cat===c).sort(pracSort);if(!list.length&&pracStuSkill==='All')return '';
-  return `<div class="skillhead"><span class="ico">${ICON[c]||''}</span><h3>${c}</h3></div><div class="card" style="margin-top:6px">${list.length?list.map(t=>`<div class="librow"><div><b>${esc(t.title)}</b><div class="meta">${tag(t.part||PRACTICE_OTHER)}</div></div><div class="acts"><button class="btn tiny" data-practise="${t.id}">${isHtmlRes(t)?'Start practice':'Open'}</button></div></div>`).join(''):'<div class="empty">No practice in this section yet.</div>'}</div>`}).join(''):'<div class="card" style="margin-top:12px"><div class="empty">No practice material yet. Check back soon.</div></div>'}`;
- document.querySelectorAll('[data-pss]').forEach(b=>b.onclick=()=>{pracStuSkill=b.dataset.pss;practiceStudent()});
+  return `<div class="skillhead"><span class="ico">${ICON[c]||''}</span><h3>${esc(CL(c))}</h3></div><div class="card" style="margin-top:6px">${list.length?list.map(t=>`<div class="librow"><div><b>${esc(t.title)}</b><div class="meta">${tag(t.part||PRACTICE_OTHER)}</div></div><div class="acts"><button class="btn tiny" data-practise="${t.id}">${isHtmlRes(t)?(PA==='g12'?'Start test':'Start practice'):'Open'}</button></div></div>`).join(''):'<div class="empty">No practice in this section yet.</div>'}</div>`}).join(''):'<div class="card" style="margin-top:12px"><div class="empty">No material here yet. Check back soon.</div></div>'}`;
+ document.querySelectorAll('[data-pss]').forEach(b=>b.onclick=()=>{_skillSet(b.dataset.pss,true);practiceStudent()});
  document.querySelectorAll('[data-practise]').forEach(b=>b.onclick=()=>openPractice(b.dataset.practise));
 }
 async function openPractice(id){const t=byId(id);if(!t?.resourcePath)return alert('No file attached.');
@@ -330,7 +345,7 @@ async function openPractice(id){const t=byId(id);if(!t?.resourcePath)return aler
  if(isSpeakingHtml(t))return launchSpeakingTest(t,'practice');
  return launchHtmlTest(t,'practice')}
 function guidePage(){document.getElementById('content').innerHTML=`<div class="head"><div><h1>IELTS Guide</h1><p class="subtitle">The 4 skills and how band scores work · English and Arabic, with voice and video.</p></div></div><iframe id="guideFrame" src="ielts-guide.html?embed=1" title="IELTS Guide" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:calc(100vh - 190px);min-height:620px;border:1px solid #dcd6c6;border-radius:12px;background:#fff"></iframe>`}
-function render(){if(!current||!profile)return login();let admin=isAdmin(),items=admin?[['dashboard','Overview'],['users','Trainees'],['tests','Test Library'],['practice','Practice'],['assignments','Assignments'],['grading','Marking'],['reports','Reports'],['live','Live classes'+(openReqs().length?`<b class="navcount">${openReqs().length}</b>`:'')],['guide','IELTS Guide']]:[['dashboard','My Dashboard'],['tests','My Tests'],['practice','Practice'],['reports','My Results'],['live','Live class'],['guide','IELTS Guide']];
+function render(){if(!current||!profile)return login();let admin=isAdmin(),items=admin?[['dashboard','Overview'],['users','Trainees'],['tests','Test Library'],['practice','Practice'],['grade12','Grade 12'],['assignments','Assignments'],['grading','Marking'],['reports','Reports'],['live','Live classes'+(openReqs().length?`<b class="navcount">${openReqs().length}</b>`:'')],['guide','IELTS Guide']]:[['dashboard','My Dashboard'],['tests','My Tests'],['practice','Practice'],...(tests.some(t=>t.practice===true&&t.area==='g12'&&t.active)?[['grade12','Grade 12']]:[]),['reports','My Results'],['live','Live class'],['guide','IELTS Guide']];
  const title=(PAGE_TITLE[page]||['',''])[admin?0:1],name=displayName()||(admin?'Instructor':'Student');
  root.innerHTML=`<div class="shell ${admin?'teacher-theme':'student-theme'}"><aside class="side"><div class="brand"><span class="logo">${ICON.logo}</span><span>Ashraf IELTS<small>ACADEMIC PRACTICE</small></span></div><nav>${items.map(([p,n])=>`<button class="nav ${page===p||(page==='trainee'&&p==='users')?'active':''}" data-nav="${p}">${ICON[p]||''}<span>${n}</span></button>`).join('')}</nav><div class="sidefoot">© ${new Date().getFullYear()} Ashraf IELTS Practice</div></aside><main class="main"><header class="top"><div class="crumb">${admin?'Instructor Portal':'Student Portal'}${title?`<span class="sep">›</span><b>${esc(title)}</b>`:''}</div><div class="row">${admin?`<button id="bell" class="btn secondary tiny bell" title="Finished tests" aria-label="Finished tests">${ICON.bell}<span id="bellCount" class="count"></span></button>`:''}<div class="usermenu"><button class="userchip" id="userBtn" aria-haspopup="true"><span class="avatar">${esc(initials())}</span><span class="uname">${esc(name)}</span></button><div class="menu hidden" id="userMenu"><div class="who"><b>${esc(name)}</b><span>${esc(admin?current.email:(profile.username||''))}</span></div>${admin?'<button id="editName">Change display name</button>':''}<button id="signout" class="out">Sign out</button></div></div></div></header><div class="content" id="content"></div></main></div>`;
  root.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{page=b.dataset.nav;render()});
@@ -338,7 +353,7 @@ function render(){if(!current||!profile)return login();let admin=isAdmin(),items
  document.getElementById('signout').onclick=()=>signOut(auth);
  document.getElementById('editName')?.addEventListener('click',editDisplayName);
  if(admin){document.getElementById('bell').onclick=showNotifications;updateBell()}
- ({dashboard,users:usersPage,trainee:traineePage,tests:testsPage,assignments:assignmentsPage,grading:gradingPage,reports:reportsPage,live:livePage,guide:guidePage,practice:practicePage}[page]||dashboard)()}
+ ({dashboard,users:usersPage,trainee:traineePage,tests:testsPage,assignments:assignmentsPage,grading:gradingPage,reports:reportsPage,live:livePage,guide:guidePage,practice:practicePage,grade12:grade12Page}[page]||dashboard)()}
 function editDisplayName(){showModal(`<h2>Display name</h2><p class="muted">This name appears in the welcome message and the top bar.</p><form id="nameForm"><label class="field">Name<input name="n" value="${esc(displayName())}" maxlength="40" placeholder="e.g. Mr. Ashraf" required></label><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn">Save</button></div></form>`);
  document.getElementById('cancelModal').onclick=closeModal;
  document.getElementById('nameForm').onsubmit=async e=>{e.preventDefault();const n=e.target.n.value.trim();if(!n)return;try{await updateDoc(doc(fs,'users',current.uid),{name:n});profile.name=n;closeModal();render();toast('Name saved.',null,'ok')}catch(x){message(x)}}}
@@ -634,10 +649,10 @@ async function launchHtmlTest(t,mode,reviewState=null){
   page='html-exam';render();
   document.getElementById('content').innerHTML=`<div class="head"><h1>${esc(t.title)} — ${mode==='review'?'Answer Review':mode==='preview'?'Instructor Preview':mode==='practice'?'Practice':'Exam'}</h1><button class="btn secondary" id="backToTests">${mode==='practice'?'Back to practice':'Back to tests'}</button></div><div class="notice">The examination opened in a separate tab. ${mode==='practice'?'This is practice: your score is shown but not recorded, and you can try again any time.':'Keep this IELTS Student Portal tab open until your result is saved.'} ${mode==='take'?'Submit Final Result inside the examination, then wait for the saved confirmation.':''}</div><button class="btn" id="returnToExam">Return to examination tab</button>`;
   document.getElementById('returnToExam').onclick=()=>{if(!popup.closed)popup.focus();else alert('The examination tab is closed. Return to My Tests to reopen it.')};
-  document.getElementById('backToTests').onclick=()=>{page=mode==='practice'?'practice':'tests';render()};
+  document.getElementById('backToTests').onclick=()=>{page=mode==='practice'?AR().page:'tests';render()};
   if(mode==='review')popup.addEventListener('load',()=>{if(nonce===examNonce&&!popup.closed)popup.postMessage({channel:HTML_CHANNEL,type:'review',reviewState},'https://firebasestorage.googleapis.com')});
   popup.location.replace(url);
- }catch(e){try{popup.close()}catch(_){}message(e);page=mode==='practice'?'practice':'tests';render()}
+ }catch(e){try{popup.close()}catch(_){}message(e);page=mode==='practice'?AR().page:'tests';render()}
 }
 // ---- Writing tests (Task 1 / Task 2): the essay is written inside the portal page and sent here ----
 const isWritingTest=t=>t&&/^Writing Task/.test(t.cat||'');
@@ -650,8 +665,8 @@ async function launchWritingTest(t,mode){
   clearInterval(timer);page='html-exam';render();
   document.getElementById('content').innerHTML=`<div class="head"><h1>${esc(t.title)}${mode==='preview'?' — Instructor Preview':mode==='practice'?' — Practice':''}</h1><button class="btn secondary" id="backToTests">Leave test</button></div><div class="notice small" style="margin:0 0 10px">Do not leave this page until you see “Your essay has been submitted”.</div><iframe id="writeFrame" src="${esc(url)}" allow="fullscreen" allowfullscreen style="width:100%;height:80vh;border:1px solid #dcd6c6;border-radius:12px;background:#fff"></iframe>`;
   examWindow=document.getElementById('writeFrame').contentWindow;examMode=mode;examTest=t;examReview=null;++examNonce;
-  document.getElementById('backToTests').onclick=async()=>{if(mode==='take'&&!ownSub(t.id)&&!await ask('Leave the writing test? Your essay stays saved in this browser, but it is not submitted yet.',{ok:'Leave test'}))return;examWindow=null;page=mode==='practice'?'practice':'tests';render()};
- }catch(e){message(e);page=mode==='practice'?'practice':'tests';render()}
+  document.getElementById('backToTests').onclick=async()=>{if(mode==='take'&&!ownSub(t.id)&&!await ask('Leave the writing test? Your essay stays saved in this browser, but it is not submitted yet.',{ok:'Leave test'}))return;examWindow=null;page=mode==='practice'?AR().page:'tests';render()};
+ }catch(e){message(e);page=mode==='practice'?AR().page:'tests';render()}
 }
 async function saveWriting(event){
  const src=event.source,org=event.origin,reply=m=>{try{src.postMessage({channel:HTML_CHANNEL,...m},org)}catch(_){}};
@@ -701,8 +716,8 @@ async function launchSpeakingTest(t,mode){
   clearInterval(timer);page='html-exam';render();
   document.getElementById('content').innerHTML=`<div class="head"><h1>${esc(t.title)}${mode==='preview'?' — Instructor Preview':mode==='practice'?' — Practice':''}</h1><button class="btn secondary" id="backToTests">Leave test</button></div><div class="notice small" style="margin:0 0 10px">Allow microphone access when your browser asks. Do not leave this page until you see “Your speaking test has been submitted”.</div><iframe id="speakFrame" src="${esc(url)}" allow="microphone; fullscreen; autoplay" allowfullscreen style="width:100%;height:80vh;border:1px solid #dcd6c6;border-radius:12px;background:#fff"></iframe>`;
   examWindow=document.getElementById('speakFrame').contentWindow;examMode=mode;examTest=t;examReview=null;++examNonce;
-  document.getElementById('backToTests').onclick=async()=>{if(mode==='take'&&!ownSub(t.id)&&!await ask('Leave the speaking test? Recordings that have not been submitted will be lost.',{ok:'Leave test',danger:true}))return;examWindow=null;page=mode==='practice'?'practice':'tests';render()};
- }catch(e){message(e);page=mode==='practice'?'practice':'tests';render()}
+  document.getElementById('backToTests').onclick=async()=>{if(mode==='take'&&!ownSub(t.id)&&!await ask('Leave the speaking test? Recordings that have not been submitted will be lost.',{ok:'Leave test',danger:true}))return;examWindow=null;page=mode==='practice'?AR().page:'tests';render()};
+ }catch(e){message(e);page=mode==='practice'?AR().page:'tests';render()}
 }
 async function saveSpeaking(event){
  const src=event.source,org=event.origin,reply=m=>{try{src.postMessage({channel:HTML_CHANNEL,...m},org)}catch(_){}};
