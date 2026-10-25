@@ -1,0 +1,25 @@
+AI-suggested marking for Grade 12 writing — one-time setup
+==========================================================
+
+1) Create an Anthropic API key (you do this yourself):
+   https://console.anthropic.com  ->  API keys  ->  Create key.  Add a little credit (Billing).
+   Cost is about $0.01–0.02 per script.
+
+2) Open Google Cloud Shell for the project:
+   https://console.cloud.google.com/?project=ashraf-ielts-practice  ->  click the  >_  (Activate Cloud Shell) icon.
+
+3) Paste these commands one block at a time (replace PASTE_YOUR_KEY_HERE with your key):
+
+gcloud config set project ashraf-ielts-practice
+gcloud services enable secretmanager.googleapis.com cloudfunctions.googleapis.com cloudbuild.googleapis.com run.googleapis.com artifactregistry.googleapis.com
+printf '%s' 'PASTE_YOUR_KEY_HERE' | gcloud secrets create anthropic-key --data-file=-
+gcloud secrets add-iam-policy-binding anthropic-key --member="serviceAccount:$(gcloud projects describe ashraf-ielts-practice --format='value(projectNumber)')-compute@developer.gserviceaccount.com" --role=roles/secretmanager.secretAccessor
+
+rm -rf ashraf-ielts-practice && git clone https://github.com/ashrafrashid50-web/ashraf-ielts-practice.git && cd ashraf-ielts-practice/functions
+gcloud functions deploy suggestWritingMarks --gen2 --runtime=nodejs20 --region=us-central1 --source=. --entry-point=suggestWritingMarks --trigger-http --allow-unauthenticated --timeout=120s --memory=256Mi --set-secrets=ANTHROPIC_API_KEY=anthropic-key:latest
+
+4) Publish the updated Firestore rules (they add the instructor-only "aiDrafts" collection):
+   Firebase console -> Firestore Database -> Rules -> paste the contents of firestore.rules -> Publish.
+
+Using it: Marking -> "AI-suggest marks for waiting Grade 12 writing" (all at once), or open a script -> "Suggest marks with AI".
+The suggestion fills the form; nothing reaches the student until you check/edit and press "Save marks".
