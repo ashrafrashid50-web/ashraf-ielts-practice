@@ -286,7 +286,7 @@ let pracSkill='Listening',pracStuSkill='All';const areaSkill={},areaStuSkill={};
 const SCHOOL=['g10','g11','g12','g12a'],isSchoolArea=a=>SCHOOL.includes(a),gradeNo=a=>a==='g12a'?'12 Advanced':(a||'').slice(1);
 const practiceItems=()=>tests.filter(t=>t.practice===true&&(t.area||'practice')===PA);
 const partsOf=c=>[...(AR().parts[c]||[]),PRACTICE_OTHER];
-const pracSort=(a,b)=>{const p=partsOf(a.cat);return (p.indexOf(a.part)<0?99:p.indexOf(a.part))-(p.indexOf(b.part)<0?99:p.indexOf(b.part))||(a.createdAt||'').localeCompare(b.createdAt||'')};
+const pracSort=(a,b)=>{const p=partsOf(a.cat);return (p.indexOf(a.part)<0?99:p.indexOf(a.part))-(p.indexOf(b.part)<0?99:p.indexOf(b.part))||String(a.title||'').localeCompare(String(b.title||''),undefined,{numeric:true,sensitivity:'base'})||(a.createdAt||'').localeCompare(b.createdAt||'')};
 const isHtmlRes=t=>/\.html?$/i.test(t.resourceName||'');
 function practicePage(){if(PA!=='practice'){PA='practice'}isAdmin()?practiceAdmin():practiceStudent()}
 function grade10Page(){if(!isAdmin()){page='tests';return render()}PA='g10';practiceAdmin()}
