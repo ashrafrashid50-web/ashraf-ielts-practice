@@ -12,11 +12,11 @@ service cloud.firestore {
     function isActive() { return hasProfile() && me().active == true; }
     function isAdmin() { return isActive() && me().role == 'admin'; }
 
-    // Test is active and assigned to this student (ALL, their uid, or their group)
+    // Test is active, assigned to this student (ALL, their uid, or their group) and they weren't removed from it
     function canTakeTest(testId) {
       let t = get(/databases/$(database)/documents/tests/$(testId)).data;
       let u = me();
-      return t.active == true && (
+      return t.active == true && !(t.get('exclude', []).hasAny([request.auth.uid])) && (
         t.assign.hasAny(['ALL', request.auth.uid]) ||
         (u.get('group', '') is string && u.get('group', '') != '' && t.assign.hasAny(['GROUP:' + u.get('group', '')]))
       );
