@@ -556,16 +556,25 @@ function openUser(){showModal(`<h2>Create trainee</h2><p class="muted">The train
   }catch(err){message(err);btn.disabled=false;btn.textContent='Create';if(secondary){try{await signOut(getAuth(secondary))}catch{}}}}}
 function testsPage(){if(!isAdmin())return myTestsPage();
  const all=tests.filter(t=>t.cat===category&&libVisible(t));
- document.getElementById('content').innerHTML=`<div class="head"><div><h1>Test Library</h1><p class="subtitle">Upload, organise and assign your practice tests.</p></div><div class="row"><button class="btn secondary" id="renumber" title="Rename the tests in this section in their current order">Rename to ${esc(numPrefix(category))} 1, 2, 3…</button><button class="btn" id="addTest">+ Upload new test</button></div></div>
+ document.getElementById('content').innerHTML=`<div class="head"><div><h1>Test Library</h1><p class="subtitle">Upload, organise and assign your practice tests.</p></div><div class="row"><button class="btn secondary" id="bulkAssign" title="Assign every test in this section at once">Assign all…</button><button class="btn secondary" id="renumber" title="Rename the tests in this section in their current order">Rename to ${esc(numPrefix(category))} 1, 2, 3…</button><button class="btn" id="addTest">+ Upload new test</button></div></div>
  <div class="card"><div class="toolbar"><label class="field narrow">IELTS section<select id="category">${CATS.map(c=>`<option ${c===category?'selected':''}>${c}</option>`).join('')}</select></label><label class="field">Search<input id="libSearch" placeholder="Search by test name or file" value="${esc(libQuery)}"></label></div>${(()=>{const k=tests.filter(t=>t.cat===category&&visibleTest(t)&&isSchoolTest(t)).length;return k?`<p class="small muted" style="margin:4px 0 8px">${showSchool?'Showing':'Hidden:'} ${k} Grade 10/11/12 test${k>1?'s':''} (they belong on the Grade pages). <button type="button" class="linkbtn" id="toggleSchool">${showSchool?'Hide them':'Show them'}</button></p>`:''})()}
  <div class="chips" id="libChips">${[['all','All'],['active','Active'],['inactive','Inactive'],['unassigned','Not assigned'],['due','Has due date']].map(([k,l])=>`<button class="chip ${libFilter===k?'on':''}" data-f="${k}">${l}<span class="n">${libCount(all,k)}</span></button>`).join('')}</div>
  <div class="countline" id="libCount"></div><div id="libList"></div></div>`;
  document.getElementById('category').onchange=e=>{category=e.target.value;testsPage()};document.getElementById('toggleSchool')?.addEventListener('click',()=>{showSchool=!showSchool;testsPage()});
  document.getElementById('addTest').onclick=()=>createTest();
- document.getElementById('renumber').onclick=renumberAllTests;
+ document.getElementById('renumber').onclick=renumberAllTests;document.getElementById('bulkAssign').onclick=bulkAssignSection;
  document.getElementById('libSearch').oninput=e=>{libQuery=e.target.value;drawLib()};
  document.querySelectorAll('#libChips [data-f]').forEach(b=>b.onclick=()=>{libFilter=b.dataset.f;document.querySelectorAll('#libChips .chip').forEach(c=>c.classList.toggle('on',c===b));drawLib()});
  drawLib()}
+// Assign every listed test in the current section to All trainees and/or groups in one go (existing assignments are kept).
+function bulkAssignSection(){const list=tests.filter(t=>t.cat===category&&libVisible(t));if(!list.length)return alert('There are no tests in this section.');
+ const groups=[...new Set(users.filter(u=>u.role==='student').map(u=>u.group).filter(Boolean))].sort();
+ showModal(`<h2>Assign all ${esc(category)} tests</h2><p class="muted">This adds the trainees you choose to all ${list.length} ${esc(category)} test${list.length>1?'s':''} in the library. Students already assigned keep their tests.</p><form id="bulkForm"><div style="max-height:300px;overflow:auto;border:1px solid #ece6d9;border-radius:10px;padding:6px 12px"><p><label><input type="checkbox" name="target" value="ALL" style="width:auto"> <b>All trainees</b></label></p>${groups.map(g=>`<p><label><input type="checkbox" name="target" value="${esc('GROUP:'+g)}" style="width:auto"> Group: ${esc(g)}</label></p>`).join('')}</div><p><label><input type="checkbox" name="activate" checked style="width:auto"> Also switch them all to <b>Active</b> (students only see active tests)</label></p><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn">Assign ${list.length} tests</button></div></form>`);
+ document.getElementById('cancelModal').onclick=closeModal;
+ document.getElementById('bulkForm').onsubmit=async e=>{e.preventDefault();const sel=[...e.target.querySelectorAll('[name=target]:checked')].map(x=>x.value),act=e.target.activate.checked;
+  if(!sel.length)return alert('Tick All trainees or at least one group.');
+  try{const batch=writeBatch(fs);list.forEach(t=>{const assign=[...new Set([...(t.assign||[]),...sel])];batch.update(doc(fs,'tests',t.id),{assign,...(act?{active:true}:{})})});
+   await batch.commit();closeModal();await refresh();render();toast(`${list.length} ${category} test${list.length>1?'s':''} assigned${act?' and active':''}.`,null,'ok')}catch(err){message(err)}}}
 function numPrefix(c){return c.startsWith('Writing')?'Task':c}
 async function renumberAllTests(){const c=category,pre=numPrefix(c);
  if(!await ask(`Rename every ${c} test to “${pre} 1”, “${pre} 2”, “${pre} 3”… in the order shown in the library? The file names stay the same, and students’ results are kept.`,{ok:'Rename tests'}))return;
