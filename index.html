@@ -815,8 +815,10 @@ const taskNo=t=>/Task 1/.test(t?.cat||'')?1:2;
 const schoolArea=t=>!t?'':isSchoolArea(t.area)?t.area:isSchoolArea(byId(t.fromPractice)?.area)?byId(t.fromPractice).area:'';
 const isG12=t=>!!schoolArea(t);
 // IELTS Test Library shows IELTS tests only; Grade 10/11/12 (school) tests live on the Grade pages.
-const schoolName=t=>/(^|[^a-z0-9])(G|Grade[ _-]?)(10|11|12)([^0-9]|$)|(^|[^a-z])EOT|End[ _-]?of[ _-]?Term/i.test((t.resourceName||'')+' '+(t.title||''));
-const isSchoolTest=t=>isG12(t)||schoolName(t);
+const schoolName=t=>/(^|[^a-z0-9])(G|Grade[ _-]?)(10|11|12)([^0-9]|$)|(^|[^a-z])EOT|(^|[^a-z])adv([^a-z]|$)|End[ _-]?of[ _-]?Term/i.test((t.resourceName||'')+' '+(t.title||''));
+const schoolGroup=g=>/(^|[^a-z0-9])(G|Grade[ _-]?)(10|11|12)([^0-9]|$)/i.test(g||'');
+const assignedSchool=t=>{const a=(t.assign||[]).filter(Boolean);if(!a.length)return false;return a.every(x=>x==='ALL'?false:x.startsWith('GROUP:')?schoolGroup(x.slice(6)):schoolGroup(users.find(u=>u.id===x)?.group))};
+const isSchoolTest=t=>isG12(t)||schoolName(t)||assignedSchool(t);
 let showSchool=false;
 const libVisible=t=>visibleTest(t)&&(showSchool||!isSchoolTest(t));
 const fmtMin=s=>s?`${Math.floor(s/60)} min ${s%60} s`:'–';
