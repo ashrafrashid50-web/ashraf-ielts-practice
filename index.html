@@ -206,6 +206,7 @@ const ICON={
  tests:svg('<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8.5 8h7M8.5 12h5"/>'),
  grade12:svg('<path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h6"/>'),
  grade12adv:svg('<path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h6"/>'),
+ grade9:svg('<path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h6"/>'),
  grade10:svg('<path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h6"/>'),
  grade11:svg('<path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h6"/>'),
  practice:svg('<path d="M12 3 3 8l9 5 9-5z"/><path d="M7 10.5V16c0 1.4 2.2 3 5 3s5-1.6 5-3v-5.5"/><path d="M21 8v6"/>'),
@@ -228,7 +229,7 @@ const ICON={
 };
 const displayName=()=>(profile?.name||'').trim();
 const initials=()=>{const n=displayName()||current?.email||'?';const p=n.replace(/@.*/,'').split(/[\s._-]+/).filter(Boolean);return ((p[0]?.[0]||'?')+(p.length>1?p[p.length-1][0]:'')).toUpperCase()};
-const PAGE_TITLE={dashboard:['Overview','My Dashboard'],users:['Trainees','Trainees'],tests:['Test Library','My Tests'],practice:['Practice','Practice'],grade10:['Grade 10','Grade 10'],grade11:['Grade 11','Grade 11'],grade12:['Grade 12','Grade 12'],grade12adv:['Grade 12 Adv','Grade 12 Adv'],assignments:['Assignments','Assignments'],grading:['Marking','Marking'],trainee:['Trainee profile','Trainee profile'],reports:['Reports','My Results'],live:['Live classes','Live class'],guide:['IELTS Guide','IELTS Guide'],'html-exam':['Test','Test'],'test-taking':['Test','Test']};
+const PAGE_TITLE={dashboard:['Overview','My Dashboard'],users:['Trainees','Trainees'],tests:['Test Library','My Tests'],practice:['Practice','Practice'],grade9:['Grade 9','Grade 9'],grade10:['Grade 10','Grade 10'],grade11:['Grade 11','Grade 11'],grade12:['Grade 12','Grade 12'],grade12adv:['Grade 12 Adv','Grade 12 Adv'],assignments:['Assignments','Assignments'],grading:['Marking','Marking'],trainee:['Trainee profile','Trainee profile'],reports:['Reports','My Results'],live:['Live classes','Live class'],guide:['IELTS Guide','IELTS Guide'],'html-exam':['Test','Test'],'test-taking':['Test','Test']};
 function friendlyError(e){const c=String(e?.code||'');
  if(/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c))return 'Wrong username or password. Please try again.';
  if(/too-many-requests/.test(c))return 'Too many attempts. Please wait a few minutes and try again.';
@@ -264,7 +265,7 @@ async function refresh(){if(!current)return;const [u,t,s]=await Promise.all([isA
 // Assignments or Marking, and practice attempts are never saved as submissions (unlimited retakes).
 const PRACTICE_PARTS={'Listening':['Full test','Part 1','Part 2','Part 3','Part 4'],'Reading':['Full test','Passage 1','Passage 2','Passage 3'],'Writing Task 1':['Practice task','Model answer'],'Writing Task 2':['Practice task','Model answer'],'Speaking':['Full test','Part 1','Part 2','Part 3']};
 const PRACTICE_OTHER='Sample / other';
-// Practice areas: the IELTS Practice page and the Grade 10/11/12 pages share the same code; items carry area:'g10'|'g11'|'g12'|'g12a'.
+// Practice areas: the IELTS Practice page and the Grade 9/10/11/12 pages share the same code; items carry area:'g9'|'g10'|'g11'|'g12'|'g12a'.
 const G12_PARTS={'Reading':['EOT sample test','Vocabulary','Grammar','Reading'],'Writing Task 2':['Writing task','Model answer']};
 const AREAS={practice:{page:'practice',title:'Practice',noun:'practice',cats:null,parts:PRACTICE_PARTS,label:c=>c,
   adminSub:'Upload full sample tests or single parts (e.g. Reading Passage 2) for students to practise freely. Practice is not marked and can be repeated.',
@@ -272,6 +273,9 @@ const AREAS={practice:{page:'practice',title:'Practice',noun:'practice',cats:nul
  g12:{page:'grade12',title:'Grade 12',noun:'Grade 12 test',cats:['Reading','Writing Task 2'],parts:G12_PARTS,label:c=>({'Reading':'Reading','Writing Task 2':'Writing'}[c]||c),
   adminSub:'Upload Grade 12 sample tests and materials. Students can practise them as often as they like (not recorded). To record scores, use ⋯ → Assign to trainees.',
   stuSub:'Grade 12 sample tests and materials. Practise as many times as you like.',sectionLabel:'Section'},
+ g9:{page:'grade9',title:'Grade 9',noun:'Grade 9 test',cats:['Reading','Writing Task 2'],parts:G12_PARTS,label:c=>({'Reading':'Reading','Writing Task 2':'Writing'}[c]||c),
+  adminSub:'Upload Grade 9 sample tests and materials. Students can practise them as often as they like (not recorded). To record scores, use ⋯ → Assign to trainees.',
+  stuSub:'Grade 9 sample tests and materials. Practise as many times as you like.',sectionLabel:'Section'},
  g10:{page:'grade10',title:'Grade 10',noun:'Grade 10 test',cats:['Reading','Writing Task 2'],parts:G12_PARTS,label:c=>({'Reading':'Reading','Writing Task 2':'Writing'}[c]||c),
   adminSub:'Upload Grade 10 sample tests and materials. Students can practise them as often as they like (not recorded). To record scores, use ⋯ → Assign to trainees.',
   stuSub:'Grade 10 sample tests and materials. Practise as many times as you like.',sectionLabel:'Section'},
@@ -283,12 +287,13 @@ const AREAS={practice:{page:'practice',title:'Practice',noun:'practice',cats:nul
   stuSub:'Grade 12 Advanced sample tests and materials. Practise as many times as you like.',sectionLabel:'Section'}};
 let PA='practice';const AR=()=>AREAS[PA],ACATS=()=>AR().cats||CATS,CL=c=>AR().label(c);
 let pracSkill='Listening',pracStuSkill='All';const areaSkill={},areaStuSkill={};
-const SCHOOL=['g10','g11','g12','g12a'],isSchoolArea=a=>SCHOOL.includes(a),gradeNo=a=>a==='g12a'?'12 Advanced':(a||'').slice(1);
+const SCHOOL=['g9','g10','g11','g12','g12a'],isSchoolArea=a=>SCHOOL.includes(a),gradeNo=a=>a==='g12a'?'12 Advanced':(a||'').slice(1);
 const practiceItems=()=>tests.filter(t=>t.practice===true&&(t.area||'practice')===PA);
 const partsOf=c=>[...(AR().parts[c]||[]),PRACTICE_OTHER];
 const natKey=x=>String(x||'').toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]+/g,''),pracSort=(a,b)=>{const p=partsOf(a.cat),pi=t=>isSchoolArea(t.area)?0:(p.indexOf(t.part)<0?99:p.indexOf(t.part));return pi(a)-pi(b)||natKey(a.title).localeCompare(natKey(b.title),undefined,{numeric:true,sensitivity:'base'})||(a.createdAt||'').localeCompare(b.createdAt||'')};
 const isHtmlRes=t=>/\.html?$/i.test(t.resourceName||'');
 function practicePage(){if(PA!=='practice'){PA='practice'}isAdmin()?practiceAdmin():practiceStudent()}
+function grade9Page(){if(!isAdmin()){page='tests';return render()}PA='g9';practiceAdmin()}
 function grade10Page(){if(!isAdmin()){page='tests';return render()}PA='g10';practiceAdmin()}
 function grade11Page(){if(!isAdmin()){page='tests';return render()}PA='g11';practiceAdmin()}
 function grade12Page(){if(!isAdmin()){page='tests';return render()}PA='g12';practiceAdmin()}
@@ -361,7 +366,7 @@ async function openPractice(id){const t=byId(id);if(!t?.resourcePath)return aler
  if(isSpeakingHtml(t))return launchSpeakingTest(t,'practice');
  return launchHtmlTest(t,'practice')}
 function guidePage(){document.getElementById('content').innerHTML=`<div class="head"><div><h1>IELTS Guide</h1><p class="subtitle">The 4 skills and how band scores work · English and Arabic, with voice and video.</p></div></div><iframe id="guideFrame" src="ielts-guide.html?embed=1" title="IELTS Guide" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:calc(100vh - 190px);min-height:620px;border:1px solid #dcd6c6;border-radius:12px;background:#fff"></iframe>`}
-function render(){if(!current||!profile)return login();let admin=isAdmin(),items=admin?[['dashboard','Overview'],['users','Trainees'],['tests','Test Library'],['practice','Practice'],['grade10','Grade 10'],['grade11','Grade 11'],['grade12','Grade 12'],['grade12adv','Grade 12 Adv'],['assignments','Assignments'],['grading','Marking'],['reports','Reports'],['live','Live classes'+(openReqs().length?`<b class="navcount">${openReqs().length}</b>`:'')],['guide','IELTS Guide']]:[['dashboard','My Dashboard'],['tests','My Tests'],['practice','Practice'],['reports','My Results'],['live','Live class'],['guide','IELTS Guide']];
+function render(){if(!current||!profile)return login();let admin=isAdmin(),items=admin?[['dashboard','Overview'],['users','Trainees'],['tests','Test Library'],['practice','Practice'],['grade9','Grade 9'],['grade10','Grade 10'],['grade11','Grade 11'],['grade12','Grade 12'],['grade12adv','Grade 12 Adv'],['assignments','Assignments'],['grading','Marking'],['reports','Reports'],['live','Live classes'+(openReqs().length?`<b class="navcount">${openReqs().length}</b>`:'')],['guide','IELTS Guide']]:[['dashboard','My Dashboard'],['tests','My Tests'],['practice','Practice'],['reports','My Results'],['live','Live class'],['guide','IELTS Guide']];
  const title=(PAGE_TITLE[page]||['',''])[admin?0:1],name=displayName()||(admin?'Instructor':'Student');
  root.innerHTML=`<div class="shell ${admin?'teacher-theme':'student-theme'}"><aside class="side"><div class="brand"><span class="logo">${ICON.logo}</span><span>Ashraf IELTS<small>ACADEMIC PRACTICE</small></span></div><nav>${items.map(([p,n])=>`<button class="nav ${page===p||(page==='trainee'&&p==='users')?'active':''}" data-nav="${p}">${ICON[p]||''}<span>${n}</span></button>`).join('')}</nav><div class="sidefoot">© ${new Date().getFullYear()} Ashraf IELTS Practice</div></aside><main class="main"><header class="top"><div class="crumb">${admin?'Instructor Portal':'Student Portal'}${title?`<span class="sep">›</span><b>${esc(title)}</b>`:''}</div><div class="row">${admin?`<button id="bell" class="btn secondary tiny bell" title="Finished tests" aria-label="Finished tests">${ICON.bell}<span id="bellCount" class="count"></span></button>`:''}<div class="usermenu"><button class="userchip" id="userBtn" aria-haspopup="true"><span class="avatar">${esc(initials())}</span><span class="uname">${esc(name)}</span></button><div class="menu hidden" id="userMenu"><div class="who"><b>${esc(name)}</b><span>${esc(admin?current.email:(profile.username||''))}</span></div>${admin?'<button id="editName">Change display name</button>':''}<button id="signout" class="out">Sign out</button></div></div></div></header><div class="content" id="content"></div></main></div>`;
  root.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{page=b.dataset.nav;render()});
@@ -369,7 +374,7 @@ function render(){if(!current||!profile)return login();let admin=isAdmin(),items
  document.getElementById('signout').onclick=()=>signOut(auth);
  document.getElementById('editName')?.addEventListener('click',editDisplayName);
  if(admin){document.getElementById('bell').onclick=showNotifications;updateBell()}
- ({dashboard,users:usersPage,trainee:traineePage,tests:testsPage,assignments:assignmentsPage,grading:gradingPage,reports:reportsPage,live:livePage,guide:guidePage,practice:practicePage,grade10:grade10Page,grade11:grade11Page,grade12:grade12Page,grade12adv:grade12advPage}[page]||dashboard)()}
+ ({dashboard,users:usersPage,trainee:traineePage,tests:testsPage,assignments:assignmentsPage,grading:gradingPage,reports:reportsPage,live:livePage,guide:guidePage,practice:practicePage,grade9:grade9Page,grade10:grade10Page,grade11:grade11Page,grade12:grade12Page,grade12adv:grade12advPage}[page]||dashboard)()}
 function editDisplayName(){showModal(`<h2>Display name</h2><p class="muted">This name appears in the welcome message and the top bar.</p><form id="nameForm"><label class="field">Name<input name="n" value="${esc(displayName())}" maxlength="40" placeholder="e.g. Mr. Ashraf" required></label><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn">Save</button></div></form>`);
  document.getElementById('cancelModal').onclick=closeModal;
  document.getElementById('nameForm').onsubmit=async e=>{e.preventDefault();const n=e.target.n.value.trim();if(!n)return;try{await updateDoc(doc(fs,'users',current.uid),{name:n});profile.name=n;closeModal();render();toast('Name saved.',null,'ok')}catch(x){message(x)}}}
@@ -406,7 +411,7 @@ const SKILLS=['Listening','Reading','Writing','Speaking'],SKCOL={Listening:'#0f7
 const skillOf=c=>/^Writing/.test(c||'')?'Writing':c;
 const ieltsRound=x=>Math.round(x*2)/2;
 const fmtBand=b=>b==null?'–':Number(b).toFixed(1);
-// Grade 10/11/12 (school) tests are marked with a score only – IELTS bands are shown for IELTS tests only.
+// Grade 9/10/11/12 (school) tests are marked with a score only – IELTS bands are shown for IELTS tests only.
 const showBand=s=>s?.band!=null&&!isG12(byId(s.testId));
 const libSort=(a,b)=>{const x=Number.isFinite(a.displayOrder)?a.displayOrder:null,y=Number.isFinite(b.displayOrder)?b.displayOrder:null;if(x!==null||y!==null){if(x===null)return 1;if(y===null)return -1;if(x!==y)return x-y}return (a.createdAt||'').localeCompare(b.createdAt||'')||String(a.title).localeCompare(String(b.title))};
 const assignedTo=(t,u)=>!t.exclude?.includes(u.id)&&!!(t.assign?.includes('ALL')||t.assign?.includes(u.id)||(u.group&&t.assign?.includes('GROUP:'+u.group)));
@@ -557,7 +562,7 @@ function openUser(){showModal(`<h2>Create trainee</h2><p class="muted">The train
 function testsPage(){if(!isAdmin())return myTestsPage();
  const all=tests.filter(t=>t.cat===category&&libVisible(t));
  document.getElementById('content').innerHTML=`<div class="head"><div><h1>Test Library</h1><p class="subtitle">Upload, organise and assign your practice tests.</p></div><div class="row"><button class="btn secondary" id="bulkAssign" title="Assign every test in this section at once">Assign all…</button><button class="btn secondary" id="renumber" title="Rename the tests in this section in their current order">Rename to ${esc(numPrefix(category))} 1, 2, 3…</button><button class="btn" id="addTest">+ Upload new test</button></div></div>
- <div class="card"><div class="toolbar"><label class="field narrow">IELTS section<select id="category">${CATS.map(c=>`<option ${c===category?'selected':''}>${c}</option>`).join('')}</select></label><label class="field">Search<input id="libSearch" placeholder="Search by test name or file" value="${esc(libQuery)}"></label></div>${(()=>{const k=tests.filter(t=>t.cat===category&&visibleTest(t)&&isSchoolTest(t)).length;return k?`<p class="small muted" style="margin:4px 0 8px">${showSchool?'Showing':'Hidden:'} ${k} Grade 10/11/12 test${k>1?'s':''} (they belong on the Grade pages). <button type="button" class="linkbtn" id="toggleSchool">${showSchool?'Hide them':'Show them'}</button></p>`:''})()}
+ <div class="card"><div class="toolbar"><label class="field narrow">IELTS section<select id="category">${CATS.map(c=>`<option ${c===category?'selected':''}>${c}</option>`).join('')}</select></label><label class="field">Search<input id="libSearch" placeholder="Search by test name or file" value="${esc(libQuery)}"></label></div>${(()=>{const k=tests.filter(t=>t.cat===category&&visibleTest(t)&&isSchoolTest(t)).length;return k?`<p class="small muted" style="margin:4px 0 8px">${showSchool?'Showing':'Hidden:'} ${k} Grade 9/10/11/12 test${k>1?'s':''} (they belong on the Grade pages). <button type="button" class="linkbtn" id="toggleSchool">${showSchool?'Hide them':'Show them'}</button></p>`:''})()}
  <div class="chips" id="libChips">${[['all','All'],['active','Active'],['inactive','Inactive'],['unassigned','Not assigned'],['due','Has due date']].map(([k,l])=>`<button class="chip ${libFilter===k?'on':''}" data-f="${k}">${l}<span class="n">${libCount(all,k)}</span></button>`).join('')}</div>
  <div class="countline" id="libCount"></div><div id="libList"></div></div>`;
  document.getElementById('category').onchange=e=>{category=e.target.value;testsPage()};document.getElementById('toggleSchool')?.addEventListener('click',()=>{showSchool=!showSchool;testsPage()});
@@ -659,7 +664,7 @@ function gradingPage(){const pend=submissions.filter(s=>s.status==='Pending grad
  document.querySelectorAll('[data-profile]').forEach(b=>b.onclick=()=>{profileId=b.dataset.profile;page='trainee';render()});
  wireGrades()}
 function grade(id){let s=submissions.find(x=>x.id===id),t=byId(s.testId),u=users.find(x=>x.id===s.userId);if(s.source==='html-writing')return isG12(t)?gradeWritingG12(s,t,u):gradeWriting(s,t,u);if(isG12(t))return gradeSchool(s,t,u);if(s.recordings)return gradeSpeaking(s,t,u);showModal(`<h2>Assess submission</h2><p><b>${esc(u?.name||s.userId)}</b> • ${esc(t?.title||s.testId)}</p>${s.videoPath?'<button class="btn secondary" id="watchVideo">▶ Watch video</button>':`<div class="card" style="white-space:pre-wrap;max-height:300px;overflow:auto">${esc(s.response||'Auto-marked MCQ')}</div>`}${canTR(s,t)?trButton(s):''}${s.score!=null?`<p>Auto score: ${s.score}/${s.maxScore}</p>`:''}<form id="gradeForm"><label class="field">Practice IELTS band (0–9)<select name="band">${Array.from({length:19},(_,i)=>i/2).map(n=>`<option value="${n}" ${s.band===n?'selected':''}>${n.toFixed(1)}</option>`).join('')}</select></label><label class="field">Feedback<textarea name="feedback">${esc(s.feedback||'')}</textarea></label><button class="btn">Save assessment</button></form>`);if(s.videoPath)document.getElementById('watchVideo').onclick=()=>openResource(s.videoPath);document.getElementById('openTR')?.addEventListener('click',()=>teacherReview(s.id));document.getElementById('gradeForm').onsubmit=async e=>{e.preventDefault();try{let band=Number(e.target.band.value),update={band,feedback:e.target.feedback.value,status:'Completed'};if(s.score==null){update.score=band;update.maxScore=9}await updateDoc(doc(fs,'submissions',id),update);closeModal();await refresh();render()}catch(err){message(err)}}}
-// Score-only marking for Grade 10/11/12 tests (no IELTS band).
+// Score-only marking for Grade 9/10/11/12 tests (no IELTS band).
 function gradeSchool(s,t,u){const auto=s.score!=null&&s.maxScore!=null&&!s.teacherMark;
  showModal(`<h2>Mark submission</h2><p><b>${esc(u?.name||s.userId)}</b> • ${esc(t?.title||s.testId)} • ${esc((s.date||'').slice(0,10))}</p>${s.recordings?`<div style="max-height:40vh;overflow:auto;border:1px solid #e6e1d4;border-radius:10px;padding:4px 14px 12px">${recordingsHtml(s)}</div>`:s.videoPath?'<button class="btn secondary" id="watchVideo">▶ Watch video</button>':canTR(s,t)?trButton(s):`<div class="card" style="white-space:pre-wrap;max-height:300px;overflow:auto">${esc(s.response||'Auto-marked')}</div>`}<form id="gradeForm" style="margin-top:12px">${auto?`<p>Score: <b>${esc(s.score)}/${esc(s.maxScore)}</b></p>`:`<div class="row" style="gap:10px"><label class="field">Mark<input type="number" name="score" min="0" step="0.5" required value="${esc(s.score??'')}"></label><label class="field">Out of<input type="number" name="max" min="1" step="1" required value="${esc(s.maxScore??'')}"></label></div>`}<label class="field">Feedback<textarea name="feedback">${esc(s.feedback||'')}</textarea></label><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Close</button><button class="btn">Save</button></div></form>`);
  document.getElementById('cancelModal').onclick=closeModal;if(s.recordings)loadRecordings();if(s.videoPath)document.getElementById('watchVideo').onclick=()=>openResource(s.videoPath);document.getElementById('openTR')?.addEventListener('click',()=>teacherReview(s.id));
@@ -823,7 +828,7 @@ const WCRIT=task=>[['tr',task===1?'Task Achievement':'Task Response'],['cc','Coh
 const taskNo=t=>/Task 1/.test(t?.cat||'')?1:2;
 const schoolArea=t=>!t?'':isSchoolArea(t.area)?t.area:isSchoolArea(byId(t.fromPractice)?.area)?byId(t.fromPractice).area:'';
 const isG12=t=>!!schoolArea(t);
-// IELTS Test Library shows IELTS tests only; Grade 10/11/12 (school) tests live on the Grade pages.
+// IELTS Test Library shows IELTS tests only; Grade 9/10/11/12 (school) tests live on the Grade pages.
 const schoolName=t=>/(^|[^a-z0-9])(G|Grade[ _-]?)(10|11|12)([^0-9]|$)|(^|[^a-z])EOT|(^|[^a-z])adv([^a-z]|$)|End[ _-]?of[ _-]?Term/i.test((t.resourceName||'')+' '+(t.title||''));
 const schoolGroup=g=>/(^|[^a-z0-9])(G|Grade[ _-]?)(10|11|12)([^0-9]|$)/i.test(g||'');
 const assignedSchool=t=>{const a=(t.assign||[]).filter(Boolean);if(!a.length)return false;return a.every(x=>x==='ALL'?false:x.startsWith('GROUP:')?schoolGroup(x.slice(6)):schoolGroup(users.find(u=>u.id===x)?.group))};
@@ -833,7 +838,7 @@ const libVisible=t=>visibleTest(t)&&(showSchool||!isSchoolTest(t));
 const fmtMin=s=>s?`${Math.floor(s/60)} min ${s%60} s`:'–';
 function gradeWriting(s,t,u){const C=WCRIT(taskNo(t)),c=s.criteria||{},opts=v=>Array.from({length:19},(_,i)=>i/2).map(n=>`<option value="${n}" ${v===n?'selected':''}>${n.toFixed(1)}</option>`).join(''),ig=s.integrity||{};
 showModal(`<h2>Writing assessment</h2><p><b>${esc(u?.name||s.userId)}</b> • ${esc(t?.title||s.testId)} • ${esc((s.date||'').slice(0,10))}</p>
-<p><button type="button" class="btn secondary tiny" id="useG12">This is a Grade 10/11/12 test – mark Part 1.1 /15 + Part 1.2 /25</button></p>
+<p><button type="button" class="btn secondary tiny" id="useG12">This is a Grade 9/10/11/12 test – mark Part 1.1 /15 + Part 1.2 /25</button></p>
 <p class="small muted">${esc(s.wordCount??'?')} words • time spent ${fmtMin(s.timeSpent)} • blocked paste attempts: ${esc(ig.paste??0)} • blocked copy attempts: ${esc(ig.copy??0)} • left full screen: ${esc(ig.fullscreenExits??0)} • switched away: ${esc(ig.leftTest??0)}</p>
 <form id="gradeForm"><label class="field">Student's essay — edit this copy to mark corrections (e.g. <i>[went → had gone]</i>). The student sees this marked copy.<textarea name="marked" style="min-height:300px;font:15px/1.7 Georgia,serif">${esc(s.markedText??s.response??'')}</textarea></label>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">${C.map(([k,l])=>`<label class="field">${l}<select name="${k}"><option value="">–</option>${opts(c[k])}</select></label>`).join('')}</div>
