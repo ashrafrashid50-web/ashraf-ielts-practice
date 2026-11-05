@@ -541,11 +541,7 @@ async function unassignFor(t,u){if(!t||!u)return;if(submissions.some(s=>s.userId
  const assign=(t.assign||[]).filter(x=>x!==u.id),viaAll=assign.includes('ALL')||(u.group&&assign.includes('GROUP:'+u.group)),exclude=[...new Set([...(t.exclude||[]),...(viaAll?[u.id]:[])])];
  try{await updateDoc(doc(fs,'tests',t.id),{assign,exclude});await refresh();render();toast('Test removed from '+u.name+'.',null,'ok');return true}catch(e){message(e)}}
 const RESET_URL='https://us-central1-ashraf-ielts-practice.cloudfunctions.net/resetTraineePassword';
-const NETLIFY_RESET_URL='https://lucky-mousse-782c81.netlify.app/.netlify/functions/ielts-reset-password';
-async function serverReset(uid,password){const viaNetlify=await netlifyReset(uid,password);if(viaNetlify)return viaNetlify;return firebaseReset(uid,password)}
-async function netlifyReset(uid,password){let r;try{r=await fetch(NETLIFY_RESET_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await current.getIdToken()},body:JSON.stringify({uid,password})})}catch(x){return null}
- let j={};try{j=await r.json()}catch{}if(r.status===404||r.status===503||j.notConfigured)return null;if(!r.ok)throw new Error(j.error||'The password could not be reset.');return {ok:true}}
-async function firebaseReset(uid,password){let r;try{r=await fetch(RESET_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await current.getIdToken()},body:JSON.stringify({uid,password})})}catch(x){return {offline:true}}
+async function serverReset(uid,password){let r;try{r=await fetch(RESET_URL,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+await current.getIdToken()},body:JSON.stringify({uid,password})})}catch(x){return {offline:true}}
  let j={};try{j=await r.json()}catch{}if(r.status===404&&!j.error)return {offline:true};if(!r.ok)throw new Error(j.error||'The password could not be reset.');return {ok:true}}
 async function clientReset(u,cur,np){const {initializeApp:initSecondary,deleteApp}=await import('https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js');const secondary=initSecondary(firebaseConfig,'trainee-reset-'+Date.now());const sa=getAuth(secondary);
  try{const cred=await signInWithEmailAndPassword(sa,u.email||usernameEmail(u.username),cur);await updatePassword(cred.user,np);await signOut(sa)}finally{try{await deleteApp(secondary)}catch{}}
