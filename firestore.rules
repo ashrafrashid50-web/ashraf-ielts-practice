@@ -35,18 +35,6 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
-    // ---------- own passwords ----------
-    // The instructor can ask a trainee to choose their own password (mustChange = true).
-    // The trainee can only mark that they have done it; they cannot see anyone else's state.
-    match /pwState/{uid} {
-      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
-      allow write: if isAdmin();
-      allow create, update: if signedIn() && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['mustChange','ownPassword','setAt'])
-        && request.resource.data.mustChange == false
-        && request.resource.data.ownPassword == true;
-    }
-
     // ---------- tests ----------
     match /tests/{testId} {
       allow read: if isActive();
