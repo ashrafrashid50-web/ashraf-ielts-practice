@@ -190,7 +190,7 @@ a.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;text
 .pickl input{width:auto}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:600px){.two{grid-template-columns:1fr}}
-</style></head><body><div id="app"></div><script type="module">
+</style><script src="ielts-check.js?v=1" defer></script></head><body><div id="app"></div><script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js';
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,createUserWithEmailAndPassword,updatePassword} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js';
 import {getFirestore,doc,getDoc,setDoc,updateDoc,deleteDoc,collection,getDocs,query,where,writeBatch,serverTimestamp,onSnapshot} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js';
@@ -859,12 +859,13 @@ showModal(`<h2>Writing assessment</h2><p><b>${esc(u?.name||s.userId)}</b> • ${
 <p><button type="button" class="btn secondary tiny" id="useG12">This is a Grade 9/10/11/12 test – mark Part 1.1 /15 + Part 1.2 /25</button></p>
 <p class="small muted">${esc(s.wordCount??'?')} words • time spent ${fmtMin(s.timeSpent)} • blocked paste attempts: ${esc(ig.paste??0)} • blocked copy attempts: ${esc(ig.copy??0)} • left full screen: ${esc(ig.fullscreenExits??0)} • switched away: ${esc(ig.leftTest??0)}</p>
 <form id="gradeForm"><label class="field">Student's essay — edit this copy to mark corrections (e.g. <i>[went → had gone]</i>). The student sees this marked copy.<textarea name="marked" style="min-height:300px;font:15px/1.7 Georgia,serif">${esc(s.markedText??s.response??'')}</textarea></label>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">${C.map(([k,l])=>`<label class="field">${l}<select name="${k}"><option value="">–</option>${opts(c[k])}</select></label>`).join('')}</div>
+${icSlotHtml(s)}<p><button type="button" class="btn secondary tiny" id="useIc">Use the computer bands &amp; feedback as a starting point</button></p><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">${C.map(([k,l])=>`<label class="field">${l}<select name="${k}"><option value="">–</option>${opts(c[k])}</select></label>`).join('')}</div>
 <label class="field">Overall band (average of the four criteria, rounded to 0.5)<select name="band">${opts(s.band)}</select></label>
 <label class="field">Feedback for the student<textarea name="feedback" style="min-height:130px" placeholder="Strengths, main areas to improve, advice for the next essay…">${esc(s.feedback||'')}</textarea></label>
 <div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Close</button><button class="btn">Save assessment</button></div></form>`);
 document.getElementById('useG12').onclick=async()=>{closeModal();if(t&&t.id&&!isSchoolArea(t.area)){try{await updateDoc(doc(fs,'tests',t.id),{area:'g12'});t.area='g12'}catch(e){console.warn(e)}}gradeWritingG12(s,t,u)};
 document.getElementById('cancelModal').onclick=closeModal;const f=document.getElementById('gradeForm');
+document.getElementById('useIc').onclick=async()=>{if(!window.IELTSCheck)return alert('The checker is still loading. Try again in a moment.');await IELTSCheck.loadDict();const r=icReport(s);if(!r)return alert('No essay to check.');C.forEach(([k])=>{f[k].value=String(r.bands[k])});f.band.value=String(r.overall);if(!f.feedback.value.trim()){const pick=k=>[...r.rows[k].good.slice(0,1).map(x=>'✓ '+x[0]),...r.rows[k].bad.slice(0,2).map(x=>'• '+x[0]+((x[2]||[]).length?' '+x[2].slice(0,4).map(y=>y[0]+' → '+y[1]).join('; '):''))];f.feedback.value=C.map(([k,l])=>l+' ('+r.bands[k]+'):\n'+pick(k).join('\n')).join('\n\n')+'\n\n'+r.next[0]}};
 f.onchange=e=>{if(C.some(([k])=>k===e.target.name)){let v=C.map(([k])=>f[k].value).filter(x=>x!=='').map(Number);if(v.length===4)f.band.value=String(Math.round(v.reduce((a,b)=>a+b,0)/4*2)/2)}};
 f.onsubmit=async e=>{e.preventDefault();try{let band=Number(f.band.value),criteria={};C.forEach(([k])=>{if(f[k].value!=='')criteria[k]=Number(f[k].value)});await updateDoc(doc(fs,'submissions',s.id),{band,score:band,maxScore:9,criteria,markedText:f.marked.value,feedback:f.feedback.value,status:'Completed'});closeModal();await refresh();render();alert('Assessment saved. The student can now see the band, feedback and marked essay.')}catch(err){message(err)}}}
 
@@ -890,8 +891,15 @@ f.onsubmit=async e=>{e.preventDefault();const{z,p11,p12}=calc();
  if(!z){if(f.p11.value===''||!(p11>=0&&p11<=15))return alert('Enter Part 1.1 marks (0–15).');if(f.p12.value===''||!(p12>=0&&p12<=25))return alert('Enter Part 1.2 marks (0–25).')}
  const criteria=z?{p11:0,p12:0,zero:true}:{p11,p12};
  try{const score=z?0:p11+p12;await updateDoc(doc(fs,'submissions',s.id),{score,maxScore:40,band:null,criteria,markedText:f.marked.value,feedback:f.feedback.value,status:'Completed'});closeModal();await refresh();render();alert(`Marks saved: ${score}/40. The student can now see the marks, feedback and marked copy.`)}catch(err){message(err)}}}
-function writingResultHtml(s){if(s.source!=='html-writing')return '';const C=WCRIT(taskNo(byId(s.testId))),box='white-space:pre-wrap;max-height:40vh;overflow:auto;border:1px solid #e6e1d4;border-radius:10px;padding:12px;font:15px/1.7 Georgia,serif',sum='cursor:pointer;font-weight:650;color:#0f7b55';
- const g=isG12(byId(s.testId));return `${s.criteria?`<div class="small" style="margin:8px 0">${g?`Part 1.1: <b>${esc(s.criteria.p11??'–')}/15</b> • Part 1.2: <b>${esc(s.criteria.p12??'–')}/25</b>`:C.map(([k,l])=>`${l}: <b>${esc(s.criteria[k]??'–')}</b>`).join(' • ')}</div>`:''}${s.markedText&&s.status==='Completed'?`<details open><summary style="${sum}">Marked essay (teacher's corrections)</summary><div style="${box}">${esc(s.markedText)}</div></details>`:''}<details><summary style="${sum}">My essay as submitted (${esc(s.wordCount??'')} words)</summary><div style="${box}">${esc(s.response||'')}</div></details>`}
+
+// ---- Automatic IELTS writing check (Task 1 / Task 2): estimated bands + feedback table (no AI) ----
+const IC_SUBS=new Map();
+function icReport(s){const t=byId(s.testId);if(!t||isG12(t)||!window.IELTSCheck||!String(s.response||'').trim())return null;return IELTSCheck.analyse(s.response,taskNo(t),t.prompt||t.title||'')}
+function icSlotHtml(s){const t=byId(s.testId);if(!t||isG12(t)||!String(s.response||'').trim())return '';IC_SUBS.set(s.id||(s.userId+'_'+s.testId),s);setTimeout(icFill,0);return `<details open style="margin-top:10px"><summary style="cursor:pointer;font-weight:650;color:#0f7b55">📊 Feedback table | جدول الملاحظات</summary><div class="icSlot" data-sid="${esc(s.id||(s.userId+'_'+s.testId))}"><p class="small muted">Checking your essay…</p></div></details>`}
+async function icFill(){const slots=[...document.querySelectorAll('.icSlot')];if(!slots.length)return;if(!window.IELTSCheck){setTimeout(icFill,300);return}await IELTSCheck.loadDict();
+ slots.forEach(el=>{const s=IC_SUBS.get(el.dataset.sid);if(!s)return;const r=icReport(s);el.innerHTML=r?IELTSCheck.html(r):''})}
+function writingResultHtml(s){if(s.source!=='html-writing')return '';const C=WCRIT(taskNo(byId(s.testId))),icSlot=icSlotHtml(s),box='white-space:pre-wrap;max-height:40vh;overflow:auto;border:1px solid #e6e1d4;border-radius:10px;padding:12px;font:15px/1.7 Georgia,serif',sum='cursor:pointer;font-weight:650;color:#0f7b55';
+ const g=isG12(byId(s.testId));return `${s.criteria?`<div class="small" style="margin:8px 0">${g?`Part 1.1: <b>${esc(s.criteria.p11??'–')}/15</b> • Part 1.2: <b>${esc(s.criteria.p12??'–')}/25</b>`:C.map(([k,l])=>`${l}: <b>${esc(s.criteria[k]??'–')}</b>`).join(' • ')}</div>`:''}${s.markedText&&s.status==='Completed'?`<details open><summary style="${sum}">Marked essay (teacher's corrections)</summary><div style="${box}">${esc(s.markedText)}</div></details>`:''}<details><summary style="${sum}">My essay as submitted (${esc(s.wordCount??'')} words)</summary><div style="${box}">${esc(s.response||'')}</div></details>${icSlot}`}
 // ---- Speaking tests (HTML): answers are recorded in the browser, uploaded to Storage, then marked by the instructor ----
 const isSpeakingHtml=t=>t&&t.cat==='Speaking'&&/\.html?$/i.test(t.resourceName||'');
 async function launchSpeakingTest(t,mode){
