@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Grade 5 English · End-of-Term 1 Mock Exam</title><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-title" content="Ashraf IELTS">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,600;7..72,700&family=Figtree:wght@400;600;800&display=swap">
+<style>
+:root{
+  --bg:#eef3ef; --surface:#ffffff; --ink:#10261e; --mute:#55675e; --line:#d5e1d9;
+  --green:#0f6b3b; --deep:#0b3d2e; --gold:#b8860b; --goldsoft:#fff6dc; --goldline:#ecd28c;
+  --ok:#0f6b3b; --oksoft:#e3f4ea; --bad:#b42318; --badsoft:#fdecea;
+  --f-display:"Literata",Georgia,serif; --f-body:"Figtree",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0a1f18; --surface:#123026; --ink:#e8f1ec; --mute:#a3b8ad; --line:#24493b;
+  --green:#4cc285; --deep:#082a20; --gold:#e3b341; --goldsoft:#2b2612; --goldline:#5c4b17;
+  --ok:#4cc285; --oksoft:#14352a; --bad:#ff8a7a; --badsoft:#3a1d1a; color-scheme:dark}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
+  padding:20px max(14px,env(safe-area-inset-left,0px)) 60px max(14px,env(safe-area-inset-right,0px))}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+a{color:var(--green);font-weight:700}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:15px}
+.hero{background:var(--deep);color:#f2f7f4;border-radius:18px;padding:clamp(20px,4vw,36px)}
+.kick{font-weight:800;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#e3b341}
+h1{font-family:var(--f-display);font-size:clamp(26px,4.4vw,40px);line-height:1.15;margin:6px 0}
+.hero p{margin:0;color:#c9dbd1}
+.who{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.who label{display:flex;flex-direction:column;font-size:13px;font-weight:600;color:#c9dbd1;flex:1 1 160px}
+.who input{margin-top:4px;font:600 16px var(--f-body);padding:9px 12px;border-radius:10px;border:1px solid #2d5a49;background:#123026;color:#f2f7f4}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:clamp(16px,3.5vw,30px)}
+.card h2{font-family:var(--f-display);font-size:24px;margin:0 0 2px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.card h2 small{font:700 14px var(--f-body);color:var(--mute);align-self:center}
+.inst{background:var(--bg);border-radius:10px;padding:8px 12px;font-weight:600;margin:10px 0 16px}
+.text{border-left:4px solid var(--gold);background:var(--goldsoft);border-radius:0 12px 12px 0;padding:14px 18px;margin-bottom:18px}
+.text h3{font-family:var(--f-display);margin:0 0 6px;text-align:center}
+.text p{margin:0 0 10px}.text p:last-child{margin:0}
+.gap{display:inline-block;min-width:80px;border-bottom:2px solid var(--ink);text-align:center;font-weight:800;color:var(--green)}
+.q{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.q.ok{border-color:var(--ok);background:var(--oksoft)}.q.bad{border-color:var(--bad);background:var(--badsoft)}
+.q p{margin:0 0 8px;font-weight:700}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0}
+.opt span{display:flex;align-items:center;gap:8px;border:2px solid var(--line);border-radius:10px;padding:8px 14px;cursor:pointer;background:var(--surface);min-height:44px}
+.opt span b{color:var(--mute)}
+.opt input:checked+span{border-color:var(--green);box-shadow:0 0 0 2px var(--green) inset}
+.opt input:focus-visible+span{outline:3px solid var(--gold);outline-offset:2px}
+.opt.right span{border-color:var(--ok);background:var(--oksoft)}
+.pics .opt span{flex-direction:column;font-size:52px;line-height:1;padding:12px 22px 8px}
+.pics .opt span b{font-size:15px}
+.fb{font-size:14px;font-weight:700;margin-top:8px}
+.q.ok .fb{color:var(--ok)}.q.bad .fb{color:var(--bad)}
+.picbox{font-size:64px;text-align:center;background:var(--bg);border-radius:12px;padding:16px;margin-bottom:6px}
+.picbox small{display:block;font-size:14px;color:var(--mute)}
+ul.prompts{margin:6px 0 14px;padding-left:22px}
+textarea{width:100%;min-height:240px;font:17px/1.6 var(--f-body);padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);resize:vertical}
+.wc{font-weight:800;margin-top:6px}.wc.short{color:var(--bad)}.wc.good{color:var(--ok)}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:1px solid var(--green);background:var(--green);color:var(--surface);font:800 16px var(--f-body);border-radius:12px;padding:12px 20px;cursor:pointer;min-height:48px}
+.btn.alt{background:var(--surface);color:var(--green)}
+.score{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:6px}
+.score div{border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;font:800 24px var(--f-display)}
+.score div small{display:block;font:600 13px var(--f-body);color:var(--mute)}
+.score .tot{background:var(--green);color:var(--surface);border-color:var(--green)}.score .tot small{color:inherit;opacity:.85}
+.msg{font-weight:700;margin:12px 0 0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:center}
+th{background:var(--bg)}
+@media print{body{background:#fff}.btns,.top{display:none}.card,.hero{break-inside:avoid}}
+</style></head>
+<body><div class="wrap">
+<div class="top"><a href="./">← Ashraf IELTS Practice</a><span>Grade 5 General · Stage 1</span></div>
+
+<section class="hero">
+  <div class="kick">Grade 5 English · Practice</div>
+  <h1>End-of-Term 1 Mock Exam</h1>
+  <p>Reading &amp; Viewing (60 marks) and Writing &amp; Representing (40 marks). Answer every question, then press <b>Check my answers</b>.</p>
+  <div class="who">
+    <label>Name<input id="nm" autocomplete="name"></label>
+    <label>Class<input id="cl" placeholder="5 /"></label>
+  </div>
+</section>
+
+<form id="exam" novalidate>
+<section class="card" data-part="p1" data-mark="2">
+  <h2>Part 1 · Vocabulary <small>10 marks (2 each)</small></h2>
+  <div class="inst">Look at the word. Choose the correct picture: A or B.</div>
+  <div id="p1"></div>
+</section>
+
+<section class="card" data-part="p2" data-mark="2">
+  <h2>Part 2 · Grammar <small>10 marks (2 each)</small></h2>
+  <div class="inst">Read the text. Choose the correct word(s) to complete each sentence: A, B or C.</div>
+  <div class="text"><h3>An Amazing Amphibian</h3>
+  <p>Last year, a scientist <span class="gap" data-g="1">(1)</span> a lake in Mexico. She <span class="gap" data-g="2">(2)</span> for a very special animal. Then she saw an axolotl. An axolotl is an amphibian <span class="gap" data-g="3">(3)</span> lives in water all its life. It has pink gills on its head. Axolotls are amazing animals. If an axolotl loses a leg, it <span class="gap" data-g="4">(4)</span> a new one. The scientist <span class="gap" data-g="5">(5)</span> very happy because she found one. Now she wants to protect these animals.</p></div>
+  <div id="p2"></div>
+</section>
+
+<section class="card" data-part="p3a" data-mark="3">
+  <h2>Part 3A · Reading <small>24 marks (3 each)</small></h2>
+  <div class="inst">Read the text. Choose the correct answer: A, B or C.</div>
+  <div class="text"><h3>Lost in the Hajar Mountains</h3>
+  <p>Last winter, Saeed and his family went to the Hajar Mountains in Ras Al Khaimah. The weather was cool and sunny. They started walking at eight o'clock in the morning. The path was rocky, and there were tall mountains all around them.</p>
+  <p>After two hours, Saeed stopped to take a photo of a small canyon. When he turned around, his family was gone. He was lost! Saeed felt frightened, but he made a good decision. He stayed in one place and did not walk away. He drank some water from his bottle and waited.</p>
+  <p>Then he remembered his father's whistle in his bag. He blew it three times. Soon, he heard his father calling his name. Saeed was very happy. Now he always walks next to his family on adventures.</p></div>
+  <div id="p3a"></div>
+</section>
+
+<section class="card" data-part="p3b" data-mark="2">
+  <h2>Part 3B · Reading <small>16 marks (2 each)</small></h2>
+  <div class="inst">Read the text. Choose the correct answer: A, B or C.</div>
+  <div class="text"><h3>The Day the Sky Turned Orange</h3>
+  <p>Omar was playing football with his friends in the park when the sky suddenly turned orange. A strong wind started to blow, and sand flew everywhere. “It's a sandstorm!” shouted his friend Khalid.</p>
+  <p>The boys couldn't see the goal anymore. Sand got into their eyes and mouths. Omar remembered his teacher's words: if there is a sandstorm, go inside quickly and cover your face. He pulled his T-shirt over his nose and led his friends to the small shop next to the park.</p>
+  <p>Inside, the shopkeeper gave them cold water. Through the window, they watched the sand hit the cars. After thirty minutes, the wind became calm and the sky was blue again.</p>
+  <p>That evening, Omar told his family about the storm. His mother smiled. “You stayed calm and helped your friends. I'm proud of you,” she said.</p></div>
+  <div id="p3b"></div>
+</section>
+
+<section class="card">
+  <h2>Part 4 · Writing <small>40 marks · marked by your teacher</small></h2>
+  <div class="picbox">🛶🏞️☀️<small>Two boys kayaking on a river in a canyon</small></div>
+  <p style="margin:10px 0 4px;font-weight:700">Write about an exciting adventure. You can use the picture or write about your own adventure. Answer these questions:</p>
+  <ul class="prompts"><li>Where did you go and who was with you?</li><li>What happened on your adventure?</li><li>How did you feel and why?</li></ul>
+  <p style="margin:0 0 8px">Write <b>at least 60 words</b> in complete sentences.</p>
+  <textarea id="wr" placeholder="Last summer, I went to…"></textarea>
+  <div class="wc short" id="wc">0 words</div>
+  <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">How your writing is marked (8 marks each)</summary>
+  <table style="margin-top:8px"><tr><th>Task</th><th>Structure</th><th>Grammar</th><th>Vocabulary</th><th>Spelling &amp; punctuation</th></tr>
+  <tr><td>Answer all 3 questions. Give a reason with <i>because</i>.</td><td>Sensible order. Use <i>and, but, because, so, then</i>.</td><td>Simple and linked sentences in the past tense.</td><td>Use adventure words correctly.</td><td>Capital letters, full stops, commas, question marks.</td></tr></table>
+  <p class="note" style="font-size:14px;color:var(--mute)">Copied writing (from the question, the stories, the internet or AI) gets 0.</p></details>
+</section>
+
+<section class="card">
+  <div class="btns">
+    <button type="button" class="btn" id="check">Check my answers</button>
+    <button type="button" class="btn alt" id="reset">Start again</button>
+    <button type="button" class="btn alt" onclick="print()">Print</button>
+  </div>
+  <div id="result" hidden>
+    <div class="score" id="score"></div>
+    <p class="msg" id="msg"></p>
+  </div>
+</section>
+</form>
+</div>
+
+<script>
+const L="ABC";
+const DATA={
+  p1:[["beach",["⛰️","🏖️"],1],["camel",["🐪","🐅"],0],["storm",["☀️","⛈️"],1],["river",["🏞️","🏜️"],0],["heatwave",["🥶","🥵"],1]],
+  p2:[["(1)",["visits","visited","visiting"],1],["(2)",["was looking","were looking","is look"],0],["(3)",["who","where","that"],2],["(4)",["regrew","regrows","regrowing"],1],["(5)",["were","is","was"],2]],
+  p3a:[
+    ["Where are the Hajar Mountains in this text?",["in Ras Al Khaimah","in Al Ain","in Dubai"],0],
+    ["What time did the family start walking?",["at seven o'clock","at eight o'clock","at ten o'clock"],1],
+    ["Why did Saeed stop?",["to drink water","to rest","to take a photo"],2],
+    ["How many times did Saeed blow the whistle?",["two times","three times","four times"],1],
+    ["What was the weather like?",["cool and sunny","hot and windy","rainy"],0],
+    ["What did Saeed do when he was lost?",["He ran to find his family.","He climbed a mountain.","He stayed in one place."],2],
+    ["“The path was rocky.” Rocky means …",["full of stones","full of water","full of trees"],0],
+    ["What is the text mostly about?",["how to take good photos","a boy who got lost and found his family","a family trip to the beach"],1]],
+  p3b:[
+    ["What were the boys doing when the sandstorm started?",["riding bikes","playing football","swimming"],1],
+    ["Where did the boys go?",["to a small shop","to their school","to Omar's house"],0],
+    ["How long did the sandstorm last?",["ten minutes","two hours","thirty minutes"],2],
+    ["“The wind became calm.” Calm means …",["quiet and gentle","very strong","very hot"],0],
+    ["Why did Omar pull his T-shirt over his nose?",["to stay warm","to keep the sand out","to hide from his friends"],1],
+    ["What else is good to do in a sandstorm?",["go to the beach","open all the windows","close the windows and stay indoors"],2],
+    ["Omar's mother was proud of him. When might your family feel proud of you?",["when you help someone in trouble","when you break a toy","when you forget your homework"],0],
+    ["What is the best title for this story?",["Winning a Football Match","Staying Safe in a Sandstorm","Shopping with Friends"],1]]
+};
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+for(const [part,qs] of Object.entries(DATA)){
+  const box=document.getElementById(part);
+  box.innerHTML=qs.map(([stem,opts],i)=>{
+    const n=`${part}-${i}`, pic=part==="p1";
+    const label=pic?`${i+1}. ${stem}`:part==="p2"?`Gap ${stem}`:`${i+1}. ${esc(stem)}`;
+    return `<div class="q" data-q="${n}"><p>${label}</p><div class="opts${pic?" pics":""}">${opts.map((o,j)=>
+      `<label class="opt"><input type="radio" name="${n}" value="${j}"><span>${pic?`${o}<b>${L[j]}</b>`:`<b>${L[j]}</b> ${esc(o)}`}</span></label>`).join("")}</div><div class="fb"></div></div>`;
+  }).join("");
+}
+// Grammar: show chosen word in the text gap
+document.querySelectorAll('#p2 input').forEach(r=>r.addEventListener('change',()=>{
+  const i=+r.name.split('-')[1];document.querySelector(`.gap[data-g="${i+1}"]`).textContent=DATA.p2[i][1][r.value];
+}));
+const wr=document.getElementById('wr'),wc=document.getElementById('wc');
+function count(){const n=(wr.value.trim().match(/\S+/g)||[]).length;wc.textContent=`${n} word${n===1?"":"s"}${n<60?` · ${60-n} more to reach 60`:" · well done!"}`;wc.className="wc "+(n<60?"short":"good");return n}
+wr.addEventListener('input',count);
+
+document.getElementById('check').onclick=()=>{
+  const res={};let blank=0;
+  for(const [part,qs] of Object.entries(DATA)){
+    const mark=+document.querySelector(`[data-part="${part}"]`).dataset.mark;let s=0;
+    qs.forEach((q,i)=>{
+      const n=`${part}-${i}`,el=document.querySelector(`[data-q="${n}"]`),pick=document.querySelector(`input[name="${n}"]:checked`);
+      const right=q[2],good=pick&&+pick.value===right;if(!pick)blank++;
+      el.classList.toggle('ok',!!good);el.classList.toggle('bad',!good);
+      el.querySelectorAll('.opt').forEach((o,j)=>o.classList.toggle('right',!good&&j===right));
+      el.querySelector('.fb').textContent=good?`✓ Correct (+${mark})`:pick?`✗ The answer is ${L[right]}.`:`✗ No answer. The answer is ${L[right]}.`;
+      if(good)s+=mark;
+    });res[part]=s;
+  }
+  const rd=res.p1+res.p2+res.p3a+res.p3b,w=count();
+  document.getElementById('score').innerHTML=[["Vocabulary",res.p1,10],["Grammar",res.p2,10],["Reading A",res.p3a,24],["Reading B",res.p3b,16]]
+    .map(([t,s,m])=>`<div>${s}/${m}<small>${t}</small></div>`).join("")+`<div class="tot">${rd}/60<small>Reading total</small></div>`;
+  const nm=document.getElementById('nm').value.trim();
+  document.getElementById('msg').textContent=`${nm?nm+", y":"Y"}ou scored ${rd} out of 60 (${Math.round(rd/60*100)}%). `+
+    (blank?`You left ${blank} question${blank>1?"s":""} blank. `:"")+
+    (w<60?`Your writing has ${w} words — try to write at least 60. `:`Your writing has ${w} words. `)+"Show your writing to your teacher for marking (40 marks).";
+  document.getElementById('result').hidden=false;document.getElementById('result').scrollIntoView({behavior:"smooth",block:"center"});
+};
+document.getElementById('reset').onclick=()=>{if(!confirm("Clear all answers and start again?"))return;
+  document.getElementById('exam').reset();document.querySelectorAll('.q').forEach(q=>{q.classList.remove('ok','bad');q.querySelector('.fb').textContent="";q.querySelectorAll('.opt').forEach(o=>o.classList.remove('right'))});
+  document.querySelectorAll('.gap').forEach((g,i)=>g.textContent=`(${i+1})`);count();document.getElementById('result').hidden=true;scrollTo({top:0,behavior:"smooth"});};
+count();
+</script>
+</body></html>
