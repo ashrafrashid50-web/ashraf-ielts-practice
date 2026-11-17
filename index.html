@@ -206,6 +206,7 @@ const ICON={
  tests:svg('<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8.5 8h7M8.5 12h5"/>'),
  grade12:svg('<path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h6"/>'),
  grade12adv:svg('<path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h6"/>'),
+ grade5:svg('<path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h6"/>'),
  grade9:svg('<path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h6"/>'),
  grade10:svg('<path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h6"/>'),
  grade11:svg('<path d="M4 4h12a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 9h8M8 13h6"/>'),
@@ -229,7 +230,7 @@ const ICON={
 };
 const displayName=()=>(profile?.name||'').trim();
 const initials=()=>{const n=displayName()||current?.email||'?';const p=n.replace(/@.*/,'').split(/[\s._-]+/).filter(Boolean);return ((p[0]?.[0]||'?')+(p.length>1?p[p.length-1][0]:'')).toUpperCase()};
-const PAGE_TITLE={dashboard:['Overview','My Dashboard'],users:['Trainees','Trainees'],tests:['Test Library','My Tests'],practice:['Practice','Practice'],grade9:['Grade 9','Grade 9'],grade10:['Grade 10','Grade 10'],grade11:['Grade 11','Grade 11'],grade12:['Grade 12','Grade 12'],grade12adv:['Grade 12 Adv','Grade 12 Adv'],assignments:['Assignments','Assignments'],grading:['Marking','Marking'],trainee:['Trainee profile','Trainee profile'],reports:['Reports','My Results'],live:['Live classes','Live class'],guide:['IELTS Guide','IELTS Guide'],'html-exam':['Test','Test'],'test-taking':['Test','Test']};
+const PAGE_TITLE={dashboard:['Overview','My Dashboard'],users:['Trainees','Trainees'],tests:['Test Library','My Tests'],practice:['Practice','Practice'],grade5:['Grade 5','Grade 5'],grade9:['Grade 9','Grade 9'],grade10:['Grade 10','Grade 10'],grade11:['Grade 11','Grade 11'],grade12:['Grade 12','Grade 12'],grade12adv:['Grade 12 Adv','Grade 12 Adv'],assignments:['Assignments','Assignments'],grading:['Marking','Marking'],trainee:['Trainee profile','Trainee profile'],reports:['Reports','My Results'],live:['Live classes','Live class'],guide:['IELTS Guide','IELTS Guide'],'html-exam':['Test','Test'],'test-taking':['Test','Test']};
 function friendlyError(e){const c=String(e?.code||'');
  if(/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c))return 'Wrong username or password. Please try again.';
  if(/too-many-requests/.test(c))return 'Too many attempts. Please wait a few minutes and try again.';
@@ -265,7 +266,7 @@ async function refresh(){if(!current)return;const [u,t,s]=await Promise.all([isA
 // Assignments or Marking, and practice attempts are never saved as submissions (unlimited retakes).
 const PRACTICE_PARTS={'Listening':['Full test','Part 1','Part 2','Part 3','Part 4'],'Reading':['Full test','Passage 1','Passage 2','Passage 3'],'Writing Task 1':['Practice task','Model answer'],'Writing Task 2':['Practice task','Model answer'],'Speaking':['Full test','Part 1','Part 2','Part 3']};
 const PRACTICE_OTHER='Sample / other';
-// Practice areas: the IELTS Practice page and the Grade 9/10/11/12 pages share the same code; items carry area:'g9'|'g10'|'g11'|'g12'|'g12a'.
+// Practice areas: the IELTS Practice page and the Grade 5/9/10/11/12 pages share the same code; items carry area:'g5'|'g9'|'g10'|'g11'|'g12'|'g12a'.
 const G12_PARTS={'Reading':['EOT sample test','Vocabulary','Grammar','Reading'],'Writing Task 2':['Writing task','Model answer']};
 const AREAS={practice:{page:'practice',title:'Practice',noun:'practice',cats:null,parts:PRACTICE_PARTS,label:c=>c,
   adminSub:'Upload full sample tests or single parts (e.g. Reading Passage 2) for students to practise freely. Practice is not marked and can be repeated.',
@@ -273,6 +274,9 @@ const AREAS={practice:{page:'practice',title:'Practice',noun:'practice',cats:nul
  g12:{page:'grade12',title:'Grade 12',noun:'Grade 12 test',cats:['Reading','Writing Task 2'],parts:G12_PARTS,label:c=>({'Reading':'Reading','Writing Task 2':'Writing'}[c]||c),
   adminSub:'Upload Grade 12 sample tests and materials. Students can practise them as often as they like (not recorded). To record scores, use ⋯ → Assign to trainees.',
   stuSub:'Grade 12 sample tests and materials. Practise as many times as you like.',sectionLabel:'Section'},
+ g5:{page:'grade5',title:'Grade 5',noun:'Grade 5 test',cats:['Reading','Writing Task 2'],parts:G12_PARTS,label:c=>({'Reading':'Reading','Writing Task 2':'Writing'}[c]||c),
+  adminSub:'Upload Grade 5 sample tests and materials. Students can practise them as often as they like (not recorded). To record scores, use ⋯ → Assign to trainees.',
+  stuSub:'Grade 5 sample tests and materials. Practise as many times as you like.',sectionLabel:'Section'},
  g9:{page:'grade9',title:'Grade 9',noun:'Grade 9 test',cats:['Reading','Writing Task 2'],parts:G12_PARTS,label:c=>({'Reading':'Reading','Writing Task 2':'Writing'}[c]||c),
   adminSub:'Upload Grade 9 sample tests and materials. Students can practise them as often as they like (not recorded). To record scores, use ⋯ → Assign to trainees.',
   stuSub:'Grade 9 sample tests and materials. Practise as many times as you like.',sectionLabel:'Section'},
@@ -287,12 +291,13 @@ const AREAS={practice:{page:'practice',title:'Practice',noun:'practice',cats:nul
   stuSub:'Grade 12 Advanced sample tests and materials. Practise as many times as you like.',sectionLabel:'Section'}};
 let PA='practice';const AR=()=>AREAS[PA],ACATS=()=>AR().cats||CATS,CL=c=>AR().label(c);
 let pracSkill='Listening',pracStuSkill='All';const areaSkill={},areaStuSkill={};
-const SCHOOL=['g9','g10','g11','g12','g12a'],isSchoolArea=a=>SCHOOL.includes(a),gradeNo=a=>a==='g12a'?'12 Advanced':(a||'').slice(1);
+const SCHOOL=['g5','g9','g10','g11','g12','g12a'],isSchoolArea=a=>SCHOOL.includes(a),gradeNo=a=>a==='g12a'?'12 Advanced':(a||'').slice(1);
 const practiceItems=()=>tests.filter(t=>t.practice===true&&(t.area||'practice')===PA);
 const partsOf=c=>[...(AR().parts[c]||[]),PRACTICE_OTHER];
 const natKey=x=>String(x||'').toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]+/g,''),pracSort=(a,b)=>{const p=partsOf(a.cat),pi=t=>isSchoolArea(t.area)?0:(p.indexOf(t.part)<0?99:p.indexOf(t.part));return pi(a)-pi(b)||natKey(a.title).localeCompare(natKey(b.title),undefined,{numeric:true,sensitivity:'base'})||(a.createdAt||'').localeCompare(b.createdAt||'')};
 const isHtmlRes=t=>/\.html?$/i.test(t.resourceName||'');
 function practicePage(){if(PA!=='practice'){PA='practice'}isAdmin()?practiceAdmin():practiceStudent()}
+function grade5Page(){if(!isAdmin()){page='tests';return render()}PA='g5';practiceAdmin()}
 function grade9Page(){if(!isAdmin()){page='tests';return render()}PA='g9';practiceAdmin()}
 function grade10Page(){if(!isAdmin()){page='tests';return render()}PA='g10';practiceAdmin()}
 function grade11Page(){if(!isAdmin()){page='tests';return render()}PA='g11';practiceAdmin()}
@@ -306,12 +311,14 @@ function practiceAdmin(){
  const all=practiceItems(),list=all.filter(t=>t.cat===pracSkill).sort(pracSort);
  document.getElementById('content').innerHTML=`<div class="head"><div><h1>${A.title}</h1><p class="subtitle">${esc(A.adminSub)}</p></div><div class="row">${list.length?`<button class="btn secondary" id="pracVisAll">${list.some(t=>t.active)?'Hide all':'Show all'}</button><button class="btn secondary" id="pracDelAll" style="color:#b42318">Delete all</button>`:''}<button class="btn" id="addPractice">+ Upload ${isSchoolArea(PA)?'test':'practice'}</button></div></div>
  <div class="chips" style="margin-top:14px">${ACATS().map(c=>`<button class="chip ${pracSkill===c?'on':''}" data-psk="${esc(c)}">${esc(CL(c))}<span class="n">${all.filter(t=>t.cat===c).length}</span></button>`).join('')}</div>
+ ${PA==='g5'?`<div class="card" style="margin-top:14px"><div class="librow"><div style="min-width:0"><b>End-of-Term 1 Mock Exam (online)</b><div class="meta">${tag('Built-in')}<span>Vocabulary, grammar, 2 reading texts and writing · reading marked automatically out of 60</span></div></div><div class="acts"><a class="btn secondary tiny" href="grade5.html" target="_blank" rel="noopener">Open</a><button class="btn secondary tiny" id="g5copy">Copy student link</button></div></div></div>`:''}
  <div class="card" style="margin-top:10px">${list.length?list.map(t=>`<div class="librow"><div style="min-width:0"><b>${esc(t.title)}</b><div class="meta">${tag(t.part||PRACTICE_OTHER)}<span>${t.resourceName?'File: '+esc(t.resourceName):'No file attached'}</span>${(()=>{const c=practiceCopy(t.id);return c&&c.assign?.length?`<button type="button" class="tag" data-whoassigned="${c.id}" title="${esc(assignSummary(c))} – click to see who" style="border:0;cursor:pointer;font:inherit">Assigned</button>`:''})()}</div></div>
   <div class="acts"><button class="btn secondary tiny" data-passign="${t.id}">Assign</button><button class="btn secondary tiny" data-ppreview="${t.id}">Preview</button><button class="switch ${t.active?'on':''}" data-ptoggle="${t.id}" title="${t.active?'Click to hide from students':'Click to show to students'}"><i></i>${t.active?'Visible':'Hidden'}</button>
   <details class="more"><summary aria-label="More actions for ${esc(t.title)}">⋯</summary><div class="menu"><button data-passign="${t.id}">Assign to trainees</button><button data-pedit="${t.id}">Rename / change part</button><button data-preplace="${t.id}">Replace file</button><button class="danger-item" data-pdelete="${t.id}">Delete</button></div></details></div></div>`).join('')
   :`<div class="empty">No ${esc(CL(pracSkill))} items yet. Click Upload to add one.</div>`}</div>`;
  document.querySelectorAll('[data-psk]').forEach(b=>b.onclick=()=>{_skillSet(b.dataset.psk,false);practiceAdmin()});
  document.getElementById('addPractice').onclick=uploadPractice;
+ const g5c=document.getElementById('g5copy');if(g5c)g5c.onclick=()=>{const u=new URL('grade5.html',location.href).href;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{g5c.textContent='Link copied ✓'},()=>prompt('Copy this link for students:',u))};
  const vis=document.getElementById('pracVisAll');if(vis)vis.onclick=async()=>{const on=!list.some(t=>t.active);if(!await ask(`${on?'Show':'Hide'} all ${list.length} ${pracSkill} practice item(s) ${on?'to':'from'} students?`,{ok:on?'Show all':'Hide all'}))return;vis.disabled=true;try{await Promise.all(list.filter(t=>t.active!==on).map(t=>updateDoc(doc(fs,'tests',t.id),{active:on})));await refresh();practiceAdmin();toast(`All ${pracSkill} practice ${on?'shown':'hidden'}.`,null,'ok')}catch(e){message(e);vis.disabled=false}};
  const del=document.getElementById('pracDelAll');if(del)del.onclick=async()=>{if(!await ask(`Delete ALL ${list.length} ${pracSkill} practice item(s)? Students will no longer see them. This cannot be undone. Tests you already assigned from them stay in the Test Library.`,{ok:'Delete all',danger:true}))return;del.disabled=true;let ok=0;try{for(const t of list){await deleteDoc(doc(fs,'tests',t.id));ok++}}catch(e){message(e)}await refresh();practiceAdmin();toast(`${ok} practice item(s) deleted.`,null,'ok')};
  document.querySelectorAll('details.more').forEach(d=>d.addEventListener('toggle',()=>{if(d.open)document.querySelectorAll('details.more[open]').forEach(o=>{if(o!==d)o.open=false})}));
@@ -366,7 +373,7 @@ async function openPractice(id){const t=byId(id);if(!t?.resourcePath)return aler
  if(isSpeakingHtml(t))return launchSpeakingTest(t,'practice');
  return launchHtmlTest(t,'practice')}
 function guidePage(){document.getElementById('content').innerHTML=`<div class="head"><div><h1>IELTS Guide</h1><p class="subtitle">The 4 skills and how band scores work · English and Arabic, with voice and video.</p></div></div><iframe id="guideFrame" src="ielts-guide.html?embed=1" title="IELTS Guide" allow="autoplay; fullscreen" allowfullscreen style="width:100%;height:calc(100vh - 190px);min-height:620px;border:1px solid #dcd6c6;border-radius:12px;background:#fff"></iframe>`}
-function render(){if(!current||!profile)return login();let admin=isAdmin(),items=admin?[['dashboard','Overview'],['users','Trainees'],['tests','Test Library'],['practice','Practice'],['grade9','Grade 9'],['grade10','Grade 10'],['grade11','Grade 11'],['grade12','Grade 12'],['grade12adv','Grade 12 Adv'],['assignments','Assignments'],['grading','Marking'],['reports','Reports'],['live','Live classes'+(openReqs().length?`<b class="navcount">${openReqs().length}</b>`:'')],['guide','IELTS Guide']]:[['dashboard','My Dashboard'],['tests','My Tests'],['practice','Practice'],['reports','My Results'],['live','Live class'],['guide','IELTS Guide']];
+function render(){if(!current||!profile)return login();let admin=isAdmin(),items=admin?[['dashboard','Overview'],['users','Trainees'],['tests','Test Library'],['practice','Practice'],['grade5','Grade 5'],['grade9','Grade 9'],['grade10','Grade 10'],['grade11','Grade 11'],['grade12','Grade 12'],['grade12adv','Grade 12 Adv'],['assignments','Assignments'],['grading','Marking'],['reports','Reports'],['live','Live classes'+(openReqs().length?`<b class="navcount">${openReqs().length}</b>`:'')],['guide','IELTS Guide']]:[['dashboard','My Dashboard'],['tests','My Tests'],['practice','Practice'],['reports','My Results'],['live','Live class'],['guide','IELTS Guide']];
  const title=(PAGE_TITLE[page]||['',''])[admin?0:1],name=displayName()||(admin?'Instructor':'Student');
  root.innerHTML=`<div class="shell ${admin?'teacher-theme':'student-theme'}"><aside class="side"><div class="brand"><span class="logo">${ICON.logo}</span><span>Ashraf IELTS<small>ACADEMIC PRACTICE</small></span></div><nav>${items.map(([p,n])=>`<button class="nav ${page===p||(page==='trainee'&&p==='users')?'active':''}" data-nav="${p}">${ICON[p]||''}<span>${n}</span></button>`).join('')}</nav><div class="sidefoot">© ${new Date().getFullYear()} Ashraf IELTS Practice</div></aside><main class="main"><header class="top"><div class="crumb">${admin?'Instructor Portal':'Student Portal'}${title?`<span class="sep">›</span><b>${esc(title)}</b>`:''}</div><div class="row">${admin?`<button id="bell" class="btn secondary tiny bell" title="Finished tests" aria-label="Finished tests">${ICON.bell}<span id="bellCount" class="count"></span></button>`:''}<div class="usermenu"><button class="userchip" id="userBtn" aria-haspopup="true"><span class="avatar">${esc(initials())}</span><span class="uname">${esc(name)}</span></button><div class="menu hidden" id="userMenu"><div class="who"><b>${esc(name)}</b><span>${esc(admin?current.email:(profile.username||''))}</span></div>${admin?'<button id="editName">Change display name</button>':''}<button id="signout" class="out">Sign out</button></div></div></div></header><div class="content" id="content"></div></main></div>`;
  root.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{page=b.dataset.nav;render()});
@@ -374,7 +381,7 @@ function render(){if(!current||!profile)return login();let admin=isAdmin(),items
  document.getElementById('signout').onclick=()=>signOut(auth);
  document.getElementById('editName')?.addEventListener('click',editDisplayName);
  if(admin){document.getElementById('bell').onclick=showNotifications;updateBell()}
- ({dashboard,users:usersPage,trainee:traineePage,tests:testsPage,assignments:assignmentsPage,grading:gradingPage,reports:reportsPage,live:livePage,guide:guidePage,practice:practicePage,grade9:grade9Page,grade10:grade10Page,grade11:grade11Page,grade12:grade12Page,grade12adv:grade12advPage}[page]||dashboard)()}
+ ({dashboard,users:usersPage,trainee:traineePage,tests:testsPage,assignments:assignmentsPage,grading:gradingPage,reports:reportsPage,live:livePage,guide:guidePage,practice:practicePage,grade5:grade5Page,grade9:grade9Page,grade10:grade10Page,grade11:grade11Page,grade12:grade12Page,grade12adv:grade12advPage}[page]||dashboard)()}
 function editDisplayName(){showModal(`<h2>Display name</h2><p class="muted">This name appears in the welcome message and the top bar.</p><form id="nameForm"><label class="field">Name<input name="n" value="${esc(displayName())}" maxlength="40" placeholder="e.g. Mr. Ashraf" required></label><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn">Save</button></div></form>`);
  document.getElementById('cancelModal').onclick=closeModal;
  document.getElementById('nameForm').onsubmit=async e=>{e.preventDefault();const n=e.target.n.value.trim();if(!n)return;try{await updateDoc(doc(fs,'users',current.uid),{name:n});profile.name=n;closeModal();render();toast('Name saved.',null,'ok')}catch(x){message(x)}}}
