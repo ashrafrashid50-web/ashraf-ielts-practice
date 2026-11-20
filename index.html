@@ -915,7 +915,8 @@ const G12LV=['Towards grade level','At grade level','Beyond grade level'];
 const g12Scale=raw=>Math.round(raw/12*25*2)/2;
 const G12AREAS={task:['Task & ideas','المهمة والأفكار'],voc:['Vocabulary','المفردات'],gram:['Grammar','القواعد'],punct:['Punctuation','علامات الترقيم'],spell:['Spelling','الإملاء']};
 function g12Parts(){return [{title:'Part 1.1 – Summary',marks:G12SUM.map(c=>[c[1],c[2],c[3]])},{title:'Part 1.2 – Essay',marks:G12ESS.map(x=>[x[1],3,'Whole marks only. '+x[2].map((d,i)=>(i+1)+' – '+d).join(' ')+' 0 – no response, unrelated, or copied.'])}]}
-function g12ReportHtml(rep){if(!rep||!Array.isArray(rep.parts))return '';const ar=t=>t?`<div dir="rtl" style="color:#0f766e;font-family:Tahoma,Arial">${esc(t)}</div>`:'';
+const g12Rep=r=>{if(typeof r==='string'){try{return JSON.parse(r)}catch(e){return null}}return r||null};
+function g12ReportHtml(rep){rep=g12Rep(rep);if(!rep||!Array.isArray(rep.parts))return '';const ar=t=>t?`<div dir="rtl" style="color:#0f766e;font-family:Tahoma,Arial">${esc(t)}</div>`:'';
  const sm=rep.summary||[];
  return `<div class="g12rep" style="margin:10px 0">${sm[0]?`<div style="background:#ecfdf5;border-left:5px solid #10b981;border-radius:8px;padding:8px 12px;margin-bottom:8px">${esc(sm[0])}${ar(sm[1])}</div>`:''}${rep.parts.map(p=>`<h4 style="margin:10px 0 4px">${esc(p.title)} — ${esc(p.score)}/${esc(p.max)}${p.scaled!=null?` → <b>${esc(p.scaled)}/25</b>`:''}</h4>
  <div class="tablewrap"><table class="tbl" style="font-size:13px"><tr>${p.marks.map(m=>`<th>${esc(m[0])}</th>`).join('')}</tr><tr>${p.marks.map(m=>`<td class="num"><b>${esc(m[1])}</b>/${esc(m[2])}</td>`).join('')}</tr></table></div>
@@ -970,13 +971,16 @@ async function g12AutoMark(s,t,onMsg){if(!window.IELTSCheck)throw Error('The che
  if(nl>=2)rows.task.good.push(['You linked the ideas well.','ربطت الأفكار بشكل جيد.']);else rows.task.bad.push(['Link the ideas with words like however, also, as a result.','اربط الأفكار بكلمات مثل however و also و as a result.',[]]);
  if(!lenOk&&sw.length>=15)rows.task.bad.push([sw.length<50?`The summary is short (${sw.length} words).`:`The summary is long (${sw.length} words). Keep only the main ideas.`,sw.length<50?`الملخص قصير (${sw.length} كلمة).`:`الملخص طويل (${sw.length} كلمة). احتفظ بالأفكار الرئيسية فقط.`,[]]);
  ['gra','lr'].forEach(k=>sr.rows[k].bad.forEach(x=>{const tgt=isSp(x)?'spell':isPu(x)?'punct':k==='gra'?'gram':'voc';if(rows[tgt].bad.length<3&&(x[2]||[]).length)rows[tgt].bad.push(x)}));
+ const known=new Set([...g12Words(brief),...g12Words(t.prompt||'')]);
+ const fixOk=f=>f&&f[1]&&f[1]!=='?'&&!known.has(String(f[0]).toLowerCase());
+ [rows,essRows].forEach(R=>Object.values(R).forEach(r=>{r.bad=r.bad.map(x=>{const f=(x[2]||[]).filter(fixOk);return /spelling/i.test(x[0])?[x[0].replace(/\(\d+\)/,'('+f.length+')'),x[1].replace(/\(\d+\)/,'('+f.length+')'),f]:[x[0],x[1],f]}).filter(x=>!(/spelling/i.test(x[0])&&!x[2].length))}));
  const sumMarks=[mi,ow,org,acc];
  const part=(title,labels,marks,maxes,rw,text)=>({title,text:String(text||'').slice(0,300),marks:labels.map((l,i)=>[l,marks[i],maxes[i]]),score:marks.reduce((a,b)=>a+b,0),max:maxes.reduce((a,b)=>a+b,0),rows:rw});
  const P1=part('Part 1.1 – Summary',G12SUM.map(x=>x[1]),sumMarks,G12SUM.map(x=>x[2]),rows,sum),P2=part('Part 1.2 – Essay',G12ESS.map(x=>x[1]),essMarks,[3,3,3,3],essRows,ess);
  const weakE=[0,1,2,3].sort((a,b)=>essMarks[a]-essMarks[b])[0];
  const lv=['Towards grade level','At grade level','Beyond grade level'][Math.max(0,Math.round(P2.score/4)-1)]||'';
  return {parts:[P1,P2],summary:[`Summary ${P1.score}/15: ${mi>=4?'most main ideas are there':'some main ideas are missing'}${ow<2?', and too much is copied from the text':''}. Essay ${P2.score}/12 (${lv}). Next step: ${G12TIP[weakE][0]}`,`الملخص ${P1.score}/15: ${mi>=4?'معظم الأفكار الرئيسية موجودة':'بعض الأفكار الرئيسية ناقصة'}${ow<2?'، ويوجد نقل كثير من النص':''}. المقال ${P2.score}/12. الخطوة التالية: ${G12TIP[weakE][1]}`],flags,model:'auto-checker',at:Date.now()}}
-function gradeWritingG12(s,t,u){const c=s.criteria||{},ig=s.integrity||{},sum=c.sum||{},ess=(c.ess&&c.ess.ct!=null)?c.ess:{};let aiOut=s.report||null;
+function gradeWritingG12(s,t,u){const c=s.criteria||{},ig=s.integrity||{},sum=c.sum||{},ess=(c.ess&&c.ess.ct!=null)?c.ess:{};let aiOut=g12Rep(s.report);
 const half=(max,v)=>`<option value="">–</option>`+Array.from({length:max*2+1},(_,i)=>i/2).map(n=>`<option value="${n}" ${v===n?'selected':''}>${n}</option>`).join('');
 const sumSel=x=>`<label class="field" title="${esc(x[3])}">${esc(x[1])} (/${x[2]})<select name="s_${x[0]}">${half(x[2],sum[x[0]])}</select><span class="small muted" style="display:block;font-size:12px;line-height:1.35">${esc(x[3])}</span></label>`;
 const essSel=x=>`<label class="field" title="${esc(x[1])}">${esc(x[1])} (/3)<select name="e_${x[0]}"><option value="">–</option>${[0,1,2,3].map(n=>`<option value="${n}" ${ess[x[0]]===n?'selected':''}>${n}${n?' – '+G12LV[n-1]:' – no response / copied'}</option>`).join('')}</select><span class="small muted" data-desc="${x[0]}" style="display:block;min-height:2.4em;font-size:12px;line-height:1.35"></span></label>`;
@@ -1013,7 +1017,7 @@ f.onsubmit=async e=>{e.preventDefault();const{z,p11,p12,raw,sv,ev}=calc();
  if(!z&&(sv.some(v=>v==null)||ev.some(v=>v==null)))return alert('Choose a mark for every criterion (or tick Score 0).');
  const criteria=z?{p11:0,p12:0,zero:true}:{p11,p12,sum:Object.fromEntries(G12SUM.map((x,i)=>[x[0],sv[i]])),ess:Object.fromEntries(G12ESS.map((x,i)=>[x[0],ev[i]])),essRaw:raw,essRubric:'stage8'};
  let report=null;if(!z&&aiOut&&f.keepRep.checked){report=JSON.parse(JSON.stringify(aiOut));const set=(p,vals)=>{if(!p)return;p.marks.forEach((m,i)=>{if(vals[i]!=null)m[1]=vals[i]});p.score=p.marks.reduce((a,m)=>a+m[1],0)};set(report.parts[0],sv);set(report.parts[1],ev);if(report.parts[1])report.parts[1].scaled=p12}
- try{const score=z?0:p11+p12;await updateDoc(doc(fs,'submissions',s.id),{score,maxScore:40,band:null,criteria,report,markedText:f.marked.value,feedback:f.feedback.value,status:'Completed'});closeModal();await refresh();render();alert(`Marks saved: ${score}/40. The student can now see the marks, feedback${report?', the feedback table':''} and marked copy.`)}catch(err){message(err)}}}
+ try{const score=z?0:p11+p12;await updateDoc(doc(fs,'submissions',s.id),{score,maxScore:40,band:null,criteria,report:report?JSON.stringify(report):null,markedText:f.marked.value,feedback:f.feedback.value,status:'Completed'});closeModal();await refresh();render();alert(`Marks saved: ${score}/40. The student can now see the marks, feedback${report?', the feedback table':''} and marked copy.`)}catch(err){message(err)}}}
 
 // ---- Automatic IELTS writing check (Task 1 / Task 2): estimated bands + feedback table (no AI) ----
 const IC_SUBS=new Map();
