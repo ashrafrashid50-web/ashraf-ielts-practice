@@ -61,9 +61,9 @@ function punctFixes(text){
  if(text.trim()&&!/[.!?]["')]?\s*$/.test(text.trim()))add('(end of essay)','add a full stop .');
  return fixes}
 
-function analyse(text,task,prompt){
+function analyse(text,task,prompt,opts){
  task=task===1?1:2;text=String(text||'').replace(/\r/g,'');const low=text.toLowerCase();
- const words=text.match(/[A-Za-z][A-Za-z'’-]*/g)||[],wc=words.length,min=task===1?150:250;
+ const words=text.match(/[A-Za-z][A-Za-z'’-]*/g)||[],wc=words.length,min=(opts&&+opts.min>0)?+opts.min:(task===1?150:250);
  const sents=text.split(/(?<=[.!?])\s+/).map(s=>s.trim()).filter(s=>/[a-z]/i.test(s));const ns=Math.max(1,sents.length);
  const paras=text.split(/\n+/).map(p=>p.trim()).filter(p=>(p.match(/[A-Za-z]+/g)||[]).length>=5);const np=paras.length;
  const content=words.map(w=>w.toLowerCase().replace(/[’']s$/,'')).filter(w=>!STOP.has(w)&&w.length>2);
