@@ -931,7 +931,7 @@ async function g12AiMark(s,t,onMsg){const job=[...crypto.getRandomValues(new Uin
  onMsg('Reading the test…');const brief=await g12Brief(t);
  onMsg('The AI is marking… (about 30–60 seconds)');
  await fetch(AI_BASE+'ielts-ai-mark-background',{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({job,token:await current.getIdToken(),grade:gradeNo(schoolArea(t))||'12',brief,answer:s.response||'',parts:g12Parts()})});
- for(let i=0;i<100;i++){await new Promise(r=>setTimeout(r,3000));let d={};try{const r=await fetch(AI_BASE+'ielts-ai-mark?job='+job,{cache:'no-store'});d=await r.json()}catch(e){continue}
+ let fails=0;for(let i=0;i<100;i++){await new Promise(r=>setTimeout(r,3000));let d={};try{const r=await fetch(AI_BASE+'ielts-ai-mark?job='+job,{cache:'no-store'});if(r.status===404)throw Error('The AI service was not found on the Grade 8 Netlify site. Deploy the latest Grade 8 v127 zip there, then try again.');d=await r.json();fails=0}catch(e){if(/not found/.test(e.message))throw e;if(++fails>=5)throw Error('Cannot reach the AI service ('+(e.message||'network error')+'). Check the Grade 8 Netlify site, then try again.');onMsg('Waiting for the AI service… ('+fails+')');continue}
   if(d.status==='done')return d.out;if(d.status==='error')throw Error(d.error||'AI marking failed.');onMsg('The AI is marking… '+(i*3+3)+'s')}
  throw Error('The AI took too long. Please try again.')}
 function gradeWritingG12(s,t,u){const c=s.criteria||{},ig=s.integrity||{},sum=c.sum||{},ess=(c.ess&&c.ess.ct!=null)?c.ess:{};let aiOut=s.report||null;
