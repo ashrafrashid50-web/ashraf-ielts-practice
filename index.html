@@ -926,11 +926,12 @@ async function g12Brief(t){try{let url=t.resourceURL||'';if(!url&&t.resourcePath
   const h=await (await fetch(url)).text();const lits=[];
   (h.match(/<script[\s\S]*?<\/script>/gi)||[]).forEach(sc=>{(sc.match(/(["'`])((?:\\.|(?!\1)[^\\])*?)\1/g)||[]).forEach(q=>{const x=q.slice(1,-1).replace(/\\n/g,' ').replace(/<[^>]+>/g,' ').trim();if(x.length>40&&!/[{};=]/.test(x))lits.push(x)})});
   const body=h.replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/\s+/g,' ').trim();
-  return ((t.prompt?t.prompt+' | ':'')+body+(lits.length?' | Text found in the test: '+[...new Set(lits)].join(' | '):'')).slice(0,7000)}catch(e){console.warn('brief',e);return t.prompt||t.title||''}}
+  return ((t.prompt?t.prompt+' | ':'')+body+(lits.length?' | Text found in the test: '+[...new Set(lits)].join(' | '):'')).slice(0,25000)}catch(e){console.warn('brief',e);return t.prompt||t.title||''}}
 // Free automatic marking (no AI, no key): runs in the browser with the site's own checker (ielts-check.js).
 // Minimum words used by the automatic check (change if your exam says otherwise).
 const G12_MIN={essay:150,summary:60};
 const G12TIP=[['develop every part of the question with detailed reasons and examples.','طوّر كل جزء من السؤال بأسباب وأمثلة مفصّلة.'],['organise clear paragraphs with topic sentences and use a wider range of linking words.','نظّم فقرات واضحة بجمل رئيسية واستخدم أدوات ربط متنوعة.'],['use more complex sentences (conditionals, relative clauses, passive) accurately and check punctuation.','استخدم جملًا مركبة أكثر (الشرط، جمل الصلة، المبني للمجهول) بدقة وراجع علامات الترقيم.'],['use more precise, topic-specific words and collocations, and avoid repetition.','استخدم كلمات أدق خاصة بالموضوع ومتلازمات لفظية وتجنّب التكرار.']];
+const G12TASKW=new Set('summary summarise summarize essay paragraph paragraphs words word write writing minimum maximum least answer answers question questions instructions instruction opinion agree disagree reasons examples marks mark part parts task tasks below above following source text passage read reading should include student students'.split(' '));
 const G12STOP=new Set('the and that this with from have has had were was are for not but they their them there these those which what when where while will would could should about into than then also very more most some such only other each many much been being your you our his her its it is be to of in on at by as or an a we he she i my me us do does did can may might must just over under after before because although however therefore people person'.split(' '));
 function g12Split(text){const t=String(text||'').replace(/\r/g,'');let m=t.search(/part\s*1\s*[.\-–]\s*2/i);if(m<0)m=t.search(/\bpart\s*(2|two)\b/i);
  let a,b;if(m>0){a=t.slice(0,m);b=t.slice(m)}else{const ps=t.split(/\n\s*\n/);a=ps[0]||'';b=ps.slice(1).join('\n\n')}
@@ -950,9 +951,9 @@ async function g12AutoMark(s,t,onMsg){if(!window.IELTSCheck)throw Error('The che
  const essRows={task:{good:[...er.rows.tr.good,...er.rows.cc.good].slice(0,3),bad:[...er.rows.tr.bad,...er.rows.cc.bad].slice(0,4)},voc:{good:er.rows.lr.good.filter(x=>!isSp(x)).slice(0,2),bad:er.rows.lr.bad.filter(x=>!isSp(x)).slice(0,3)},
   gram:{good:er.rows.gra.good.filter(x=>!isPu(x)).slice(0,2),bad:er.rows.gra.bad.filter(x=>!isPu(x)).slice(0,3)},punct:{good:er.rows.gra.good.filter(isPu).slice(0,2),bad:er.rows.gra.bad.filter(isPu).slice(0,3)},spell:{good:er.rows.lr.good.filter(isSp).slice(0,1),bad:er.rows.lr.bad.filter(isSp).slice(0,2)}};
  // ---- Part 1.1 summary (/15) ----
- const sw=g12Words(sum),src=g12Words(brief.replace(/part\s*1\s*[.\-–]\s*2[\s\S]*/i,'')),srcSet=new Set(src);const rows={task:{good:[],bad:[]},voc:{good:[],bad:[]},gram:{good:[],bad:[]},punct:{good:[],bad:[]},spell:{good:[],bad:[]}};
+ const sw=g12Words(sum),src=g12Words(brief).filter(w=>!G12TASKW.has(w)),srcSet=new Set(src);const rows={task:{good:[],bad:[]},voc:{good:[],bad:[]},gram:{good:[],bad:[]},punct:{good:[],bad:[]},spell:{good:[],bad:[]}};
  const freq={};src.filter(w=>w.length>=5&&!G12STOP.has(w)).forEach(w=>{const k=w.slice(0,6);freq[k]=(freq[k]||0)+1});
- const keys=Object.entries(freq).filter(([,n])=>n>=2).sort((a,b)=>b[1]-a[1]).slice(0,20).map(x=>x[0]);
+ const keys=src.length<80?[]:Object.entries(freq).filter(([,n])=>n>=2).sort((a,b)=>b[1]-a[1]).slice(0,20).map(x=>x[0]);
  const sk=new Set(sw.map(w=>w.slice(0,6)));const cov=keys.length?keys.filter(k=>sk.has(k)).length/keys.length:null;
  const grams=n=>{const g=[];for(let i=0;i+n<=sw.length;i++)g.push(sw.slice(i,i+n).join(' '));return g};const srcTxt=' '+src.join(' ')+' ';
  const g5=grams(5),copied=g5.length&&src.length>40?g5.filter(g=>srcTxt.includes(' '+g+' ')).length/g5.length:0;
