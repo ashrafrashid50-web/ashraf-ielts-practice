@@ -54,7 +54,8 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly([
              'testId','userId','date','status','score','maxScore','band',
              'feedback','response','answers','reviewState','source','videoPath',
-             'wordCount','timeSpent','integrity','recordings','notes'
+             'wordCount','timeSpent','integrity','recordings','notes',
+             'criteria','report'
            ])
         && request.resource.data.status in ['Completed', 'Pending grading']
         && canTakeTest(request.resource.data.testId);

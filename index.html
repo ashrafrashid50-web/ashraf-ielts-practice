@@ -864,7 +864,14 @@ async function saveWriting(event){
   const n=v=>Math.max(0,Math.min(100000,Math.round(Number(v)||0)));
   const data={testId:t.id,userId:current.uid,date:new Date().toISOString(),status:'Pending grading',score:null,maxScore:null,band:null,feedback:'',response:text,answers:[],reviewState:null,source:'html-writing',
    wordCount:n(d.wordCount),timeSpent:n(d.timeSpent),integrity:{paste:n(d.pasteBlocked),copy:n(d.copyBlocked),fullscreenExits:n(d.fullscreenExits),leftTest:n(d.leftTest)}};
-  await setDoc(doc(fs,'submissions',`${current.uid}_${t.id}`),data);
+  const sref=doc(fs,'submissions',`${current.uid}_${t.id}`);
+  // Grade 9–12 / 12 Adv writing: mark automatically at once, so the student sees the score and feedback straight away.
+  let auto=null;if(isG12(t)){try{auto=await g12AutoMark({response:text},t,()=>{})}catch(err){console.warn('auto-mark',err)}}
+  if(auto&&auto.parts&&auto.parts[0]&&auto.parts[1]){const P1=auto.parts[0],P2=auto.parts[1],p11=P1.score,raw=P2.score,p12=g12Scale(raw);
+   data.status='Completed';data.score=p11+p12;data.maxScore=40;data.feedback=(auto.summary||[]).filter(Boolean).join('\n\n');
+   const full={...data,criteria:{p11,p12,sum:Object.fromEntries(G12SUM.map((x,i)=>[x[0],P1.marks[i][1]])),ess:Object.fromEntries(G12ESS.map((x,i)=>[x[0],P2.marks[i][1]])),essRaw:raw,essRubric:'stage8',auto:true},report:JSON.stringify({...auto,parts:[P1,{...P2,scaled:p12}]})};
+   try{await setDoc(sref,full)}catch(err){if(err.code==='permission-denied'){await setDoc(sref,data)}else throw err}}
+  else await setDoc(sref,data);
   reply({type:'saved'});await refresh();
  }catch(e){let m=e.message||String(e);if(e.code==='permission-denied')m='Firestore refused the save. Check that this test is active and assigned to you and that the latest firestore.rules are published.';reply({type:'error',message:m});message(e)}
  finally{busy=false}
