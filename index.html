@@ -912,7 +912,7 @@ const G12ESS=[['ct','Content & Task Achievement',['Towards grade level: all part
  ['ga','Grammatical Range & Accuracy',['Towards grade level: flexible and accurate use of a broad range of structures across contexts; more precise control of tense, aspect and modality; some errors with advanced forms, generally not disruptive. Wide range of punctuation; errors occur but rarely impede meaning.','At grade level: consistent control of complex structures; tense, modality and sentence variety (e.g. inversion, conditionals, reported speech) used to express nuanced meaning; grammar supports coherence and tone; subtle errors are infrequent. Wide range of punctuation; errors rarely impede meaning.','Beyond grade level: wide and varied range of structures with high accuracy and flexibility; natural control of complex forms (e.g. mixed conditionals, reduced clauses); awareness of formal/informal style; errors minimal (one or two minor). Wide range of punctuation; few errors, which do not impede meaning.']],
  ['la','Lexical Range & Accuracy',['Towards grade level: broad and varied vocabulary across general and some specialised topics; more precise, nuanced communication; flexibility in sentence structure and tone.','At grade level: wide range of vocabulary including appropriate collocations and synonyms; growing awareness of subtle differences in meaning; word choice adjusted to context and register.','Beyond grade level: some idiomatic expressions, phrasal verbs and advanced collocations that enhance fluency; increasing ability to adapt language to different contexts and registers.']]];
 const G12LV=['Towards grade level','At grade level','Beyond grade level'];
-const g12Scale=raw=>Math.round(raw/12*25*2)/2;
+const g12Scale=raw=>Math.ceil(raw/12*25*2)/2;
 const G12AREAS={task:['Task & ideas','المهمة والأفكار'],voc:['Vocabulary','المفردات'],gram:['Grammar','القواعد'],punct:['Punctuation','علامات الترقيم'],spell:['Spelling','الإملاء']};
 function g12Parts(){return [{title:'Part 1.1 – Summary',marks:G12SUM.map(c=>[c[1],c[2],c[3]])},{title:'Part 1.2 – Essay',marks:G12ESS.map(x=>[x[1],3,'Whole marks only. '+x[2].map((d,i)=>(i+1)+' – '+d).join(' ')+' 0 – no response, unrelated, or copied.'])}]}
 const g12Rep=r=>{if(typeof r==='string'){try{return JSON.parse(r)}catch(e){return null}}return r||null};
@@ -937,15 +937,15 @@ function g12Split(text){const t=String(text||'').replace(/\r/g,'');let m=t.searc
  const clean=x=>x.split('\n').filter(l=>!/^\s*part\s*1?\s*[.\-–]?\s*[12]\b.*$/i.test(l.trim())||l.trim().split(/\s+/).length>12).join('\n').trim();return [clean(a),clean(b)]}
 const g12Words=x=>(String(x||'').toLowerCase().match(/[a-z][a-z'’-]*/g)||[]);
 // checker band (0–9) → Stage 8 level: 3 Beyond needs a very strong text, 2 At grade level, 1 Towards.
-const g12Band3=b=>b>=7.5?3:b>=5.5?2:1;
+const g12Band3=b=>b>=6.5?3:b>=4.5?2:1;
 async function g12AutoMark(s,t,onMsg){if(!window.IELTSCheck)throw Error('The checker is still loading. Try again in a moment.');
  onMsg('Loading the dictionary…');await IELTSCheck.loadDict();onMsg('Reading the test…');
  const brief=await g12Brief(t),[sum,ess]=g12Split(s.response);const flags=[];
  // ---- Part 1.2 essay → Stage 8 (1–3) from the checker's bands ----
  const ep=((brief.match(/part\s*1\s*[.\-–]\s*2[\s\S]{0,700}/i)||[''])[0])||t.prompt||'';
  const er=IELTSCheck.analyse(ess||s.response,2,ep,{min:G12_MIN.essay});const ew=g12Words(ess).length,tr=er.bands.tr;
- const essMarks=ew<20?[0,0,0,0]:[g12Band3(tr),g12Band3(er.bands.cc),g12Band3(er.bands.gra),g12Band3(er.bands.lr)];
- if(ew<20)flags.push('The essay part is missing or very short.');
+ const essMarks=ew<15?[0,0,0,0]:[g12Band3(tr),g12Band3(er.bands.cc),g12Band3(er.bands.gra),g12Band3(er.bands.lr)];
+ if(ew<15)flags.push('The essay part is missing or very short.');
  const isSp=x=>/spelling/i.test(x[0]),isPu=x=>/punctuation|comma|capital|full stop|apostrophe/i.test(x[0]);
  const essRows={task:{good:[...er.rows.tr.good,...er.rows.cc.good].slice(0,3),bad:[...er.rows.tr.bad,...er.rows.cc.bad].slice(0,4)},voc:{good:er.rows.lr.good.filter(x=>!isSp(x)).slice(0,2),bad:er.rows.lr.bad.filter(x=>!isSp(x)).slice(0,3)},
   gram:{good:er.rows.gra.good.filter(x=>!isPu(x)).slice(0,2),bad:er.rows.gra.bad.filter(x=>!isPu(x)).slice(0,3)},punct:{good:er.rows.gra.good.filter(isPu).slice(0,2),bad:er.rows.gra.bad.filter(isPu).slice(0,3)},spell:{good:er.rows.lr.good.filter(isSp).slice(0,1),bad:er.rows.lr.bad.filter(isSp).slice(0,2)}};
@@ -956,15 +956,15 @@ async function g12AutoMark(s,t,onMsg){if(!window.IELTSCheck)throw Error('The che
  const sk=new Set(sw.map(w=>w.slice(0,6)));const cov=keys.length?keys.filter(k=>sk.has(k)).length/keys.length:null;
  const grams=n=>{const g=[];for(let i=0;i+n<=sw.length;i++)g.push(sw.slice(i,i+n).join(' '));return g};const srcTxt=' '+src.join(' ')+' ';
  const g5=grams(5),copied=g5.length&&src.length>40?g5.filter(g=>srcTxt.includes(' '+g+' ')).length/g5.length:0;
- let mi=cov==null?3:cov>=.6?6:cov>=.5?5:cov>=.4?4:cov>=.3?3:cov>=.2?2:cov>0.1?1:0;if(copied>0.5)mi=Math.min(mi,3);
- const ow=sw.length<15?0:copied<.15?3:copied<.3?2:copied<.5?1:0;
+ let mi=cov==null?4:cov>=.5?6:cov>=.4?5:cov>=.3?4:cov>=.2?3:cov>=.12?2:cov>0.05?1:0;if(copied>0.6)mi=Math.min(mi,4);
+ const ow=sw.length<10?0:copied<.2?3:copied<.4?2:copied<.6?1:0;
  const LK=['however','moreover','furthermore','in addition','also','therefore','as a result','because','although','while','whereas','firstly','secondly','finally','overall','for example','such as','on the other hand','another','in conclusion'];
- const nl=LK.filter(k=>new RegExp('\\b'+k+'\\b','i').test(sum)).length,lenOk=sw.length>=50&&sw.length<=160;
- const org=sw.length<15?0:(nl>=3&&lenOk)?3:(nl>=1&&sw.length>=40)?2:1;
- const sr=IELTSCheck.analyse(sum||' ',1,'',{min:G12_MIN.summary});const acc=sw.length<15?0:g12Band3((sr.bands.gra+sr.bands.lr)/2);
- if(sw.length<15){flags.push('The summary part is missing or very short.');mi=0}
+ const nl=LK.filter(k=>new RegExp('\\b'+k+'\\b','i').test(sum)).length,lenOk=sw.length>=40&&sw.length<=180;
+ const org=sw.length<10?0:(nl>=2&&lenOk)?3:(nl>=1||sw.length>=30)?2:1;
+ const sr=IELTSCheck.analyse(sum||' ',1,'',{min:G12_MIN.summary});const acc=sw.length<10?0:g12Band3((sr.bands.gra+sr.bands.lr)/2);
+ if(sw.length<10){flags.push('The summary part is missing or very short.');mi=0}
  if(cov==null)flags.push('The source text was not found in the test, so check “Main ideas” yourself.');
- if(copied>=.3)flags.push(`About ${Math.round(copied*100)}% of the summary is copied word-for-word from the source text.`);
+ if(copied>=.4)flags.push(`About ${Math.round(copied*100)}% of the summary is copied word-for-word from the source text.`);
  if(cov!=null&&mi>=4)rows.task.good.push([`You included many of the main ideas (${Math.round(cov*100)}% of the key words of the text).`,`ذكرت كثيرًا من الأفكار الرئيسية (${Math.round(cov*100)}٪ من الكلمات المفتاحية للنص).`]);
  if(cov!=null&&mi<4)rows.task.bad.push(['Some main ideas of the text are missing. Read the text again and list its main points first.','بعض الأفكار الرئيسية للنص غير موجودة. اقرأ النص مرة أخرى واكتب نقاطه الرئيسية أولًا.',[]]);
  if(ow>=3)rows.task.good.push(['You used your own words.','استخدمت كلماتك الخاصة.']);else if(sw.length>=15)rows.task.bad.push(['Too many sentences are copied from the text. Say the ideas in your own words.','جمل كثيرة منقولة من النص. عبّر عن الأفكار بكلماتك الخاصة.',[]]);
