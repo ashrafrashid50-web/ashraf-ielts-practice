@@ -332,6 +332,7 @@ function practiceAdmin(){
  document.querySelectorAll('[data-pdelete]').forEach(b=>b.onclick=async()=>{const t=byId(b.dataset.pdelete);if(!await ask(`Delete the practice “${t.title}”? Students will no longer see it.`,{ok:'Delete',danger:true}))return;try{await deleteDoc(doc(fs,'tests',t.id));await refresh();practiceAdmin();toast('Practice deleted.',null,'ok')}catch(e){message(e)}});
 }
 const PRAC_ACCEPT='.html,.htm,.pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.mp3,.wav,.m4a';
+async function fileUrl(t){if(t.resourcePath){try{return await getDownloadURL(ref(storage,t.resourcePath))}catch(e){if(!t.resourceURL)throw e;console.warn('Fresh link failed, using stored link',e)}}return t.resourceURL||''}
 async function uploadPracticeFile(id,file){const path=`resources/${id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;await uploadBytes(ref(storage,path),file,{contentType:/\.html?$/i.test(file.name)?'text/html':(file.type||'application/octet-stream')});let resourceURL='';try{resourceURL=await getDownloadURL(ref(storage,path))}catch(e){console.warn('Download URL unavailable',e)}return {resourcePath:path,resourceName:file.name,resourceURL}}
 function uploadPractice(){
  const pracSkill=_skillGet(false);showModal(`<h2>Upload ${isSchoolArea(PA)?AR().noun:'Practice'}</h2><form id="pracForm"><label class="field">${AR().sectionLabel}<select name="cat">${ACATS().map(c=>`<option value="${esc(c)}" ${c===pracSkill?'selected':''}>${esc(CL(c))}</option>`).join('')}</select></label><label class="field">Part<select name="part"></select></label><label class="field">Name (optional for several files)<input name="title" placeholder="${isSchoolArea(PA)?'e.g. '+AR().title+' EOT Sample A':'e.g. Cambridge 18 Test 2 – Passage 3'}"></label><label class="field">Files — HTML tests, PDF, Word, images or audio (several allowed)<input type="file" name="files" multiple accept="${PRAC_ACCEPT}" required></label><label style="display:flex;gap:8px;align-items:center;margin:6px 0 12px"><input type="checkbox" name="show" checked style="width:auto"> Show to all students straight away</label><p class="small muted">${isSchoolArea(PA)?AR().title+' items are open to every trainee and are not marked unless you assign them.':'Practice is open to every trainee, is not marked and can be repeated.'} Each file must be 100 MB or smaller.</p><div class="row spread"><button type="button" class="btn secondary" id="cancelModal">Cancel</button><button class="btn" id="pracSubmit">Upload</button></div></form>`);
@@ -729,7 +730,7 @@ async function teacherReview(sid){const s=submissions.find(x=>x.id===sid),t=byId
  clearInterval(timer);page='html-exam';render();const C=document.getElementById('content');
  C.innerHTML=`<div class="head"><div><h1>${esc(t.title)}</h1><p class="subtitle">${esc(u?.name||'Trainee')} • loading the test…</p></div><button class="btn secondary" id="trBack">Back</button></div>`;
  document.getElementById('trBack').onclick=()=>{page=back;render()};
- let url=t.resourceURL||'';try{if(!url)url=await getDownloadURL(ref(storage,t.resourcePath))}catch(e){return message(e)}
+ let url='';try{url=await fileUrl(t)}catch(e){return message(e)}
  let data=null;try{const r=await fetch(url);if(r.ok)data=parseExamSource(await r.text())}catch(_){}
  if(!data)data=await askExamData(url);
  if(page!=='html-exam')return;
@@ -792,8 +793,7 @@ async function reviewHtml(id){let t=byId(id),s=ownSub(id);if(!s?.reviewState)ret
 async function launchReviewFrame(t,reviewState){
  try{
   if(!t.resourcePath)throw Error('No HTML file attached.');
-  let url=t.resourceURL||'';
-  if(!url)url=await getDownloadURL(ref(storage,t.resourcePath));
+  let url=await fileUrl(t);
   if(!/^https:\/\/firebasestorage\.googleapis\.com\//i.test(url))throw Error('Invalid Firebase Storage file URL.');
   clearInterval(timer);page='html-exam';render();
   document.getElementById('content').innerHTML=`<div class="head"><h1>${esc(t.title)} — Answer Review</h1><button class="btn secondary" id="backToTests">Back to tests</button></div><div style="position:relative"><iframe id="reviewFrame" src="${esc(url)}" allow="fullscreen; autoplay" allowfullscreen style="width:100%;height:80vh;border:1px solid #dcd6c6;border-radius:12px;background:#fff"></iframe><div id="reviewCover" style="position:absolute;inset:0;background:#fbf8f1;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:650;color:#134a37">Loading your answers…</div></div>`;
@@ -813,8 +813,7 @@ async function launchHtmlTest(t,mode,reviewState=null,pre=null){
   try{popup.document.title='Opening IELTS examination';
   popup.document.body.innerHTML='<p style="font:20px sans-serif;padding:32px">Opening IELTS examination…</p>'}catch(_){}
   if(!t.resourcePath)throw Error('No HTML file attached.');
-  let url=t.resourceURL||'';
-  if(!url){try{url=await getDownloadURL(ref(storage,t.resourcePath))}catch(e){throw Error('Could not obtain the exam link. Instructor: enter its Firebase download URL under Edit / Upload. '+(e.message||e))}}
+  let url;{try{url=await fileUrl(t)}catch(e){throw Error('Could not obtain the exam link. Instructor: enter its Firebase download URL under Edit / Upload. '+(e.message||e))}}
   if(!/^https:\/\/firebasestorage\.googleapis\.com\//i.test(url))throw Error('Invalid Firebase Storage file URL.');
   clearInterval(timer);
   examWindow=popup;examMode=mode;examTest=t;examReview=reviewState;const nonce=++examNonce;if(mode==='take')examStart=Date.now();
@@ -829,7 +828,7 @@ async function launchHtmlTest(t,mode,reviewState=null,pre=null){
 }
 async function tapToOpen(t,mode,reviewState){try{
   if(!t.resourcePath)throw Error('No HTML file attached.');
-  let url=t.resourceURL||'';if(!url)url=await getDownloadURL(ref(storage,t.resourcePath));
+  let url=await fileUrl(t);
   page='html-exam';render();
   document.getElementById('content').innerHTML=`<div class="head"><h1>${esc(t.title)}</h1><button class="btn secondary" id="backToTests">Back</button></div><div class="card" style="text-align:center;padding:32px"><p style="font-size:18px">Your test is ready. Tap the button to open it in a new tab.</p><button class="btn" id="tapOpen" style="font-size:18px;padding:14px 28px">Open the test</button><p class="small muted" style="margin-top:14px">If nothing happens on iPad: Settings → Safari → turn off <b>Block Pop-ups</b>, then try again.</p></div>`;
   document.getElementById('backToTests').onclick=()=>{page=mode==='practice'?AR().page:'tests';render()};
@@ -840,8 +839,7 @@ const isWritingTest=t=>t&&/^Writing Task/.test(t.cat||'');
 async function launchWritingTest(t,mode){
  try{
   if(!t.resourcePath)throw Error('No HTML file attached.');
-  let url=t.resourceURL||'';
-  if(!url)url=await getDownloadURL(ref(storage,t.resourcePath));
+  let url=await fileUrl(t);
   if(!/^https:\/\/firebasestorage\.googleapis\.com\//i.test(url))throw Error('Invalid Firebase Storage file URL.');
   clearInterval(timer);page='html-exam';render();
   document.getElementById('content').innerHTML=`<div class="head"><h1>${esc(t.title)}${mode==='preview'?' — Instructor Preview':mode==='practice'?' — Practice':''}</h1><button class="btn secondary" id="backToTests">Leave test</button></div><div class="notice small" style="margin:0 0 10px">Do not leave this page until you see “Your essay has been submitted”.</div><iframe id="writeFrame" src="${esc(url)}" allow="fullscreen" allowfullscreen style="width:100%;height:80vh;border:1px solid #dcd6c6;border-radius:12px;background:#fff"></iframe>`;
@@ -930,7 +928,7 @@ function g12ReportHtml(rep){rep=g12Rep(rep);if(!rep||!Array.isArray(rep.parts))r
  <div class="tablewrap"><table class="tbl" style="font-size:13px"><tr>${p.marks.map(m=>`<th>${esc(m[0])}</th>`).join('')}</tr><tr>${p.marks.map(m=>`<td class="num"><b>${esc(m[1])}</b>/${esc(m[2])}</td>`).join('')}</tr></table></div>
  <div class="tablewrap"><table class="tbl" style="font-size:13px"><tr><th style="width:18%">Area | المجال</th><th>✓ What you did well | ما أحسنت فيه</th><th>✗ What to improve | ما تحتاج إلى تحسينه</th></tr>${Object.keys(G12AREAS).map(k=>{const r=(p.rows||{})[k]||{good:[],bad:[]};if(!r.good.length&&!r.bad.length)return '';
   return `<tr><td style="vertical-align:top"><b>${G12AREAS[k][0]}</b>${ar(G12AREAS[k][1])}</td><td style="vertical-align:top">${r.good.map(g=>`<div style="margin:3px 0">✓ ${esc(g[0])}${ar(g[1])}</div>`).join('')}</td><td style="vertical-align:top">${r.bad.map(b=>`<div style="margin:3px 0">• ${esc(b[0])}${ar(b[1])}${(b[2]||[]).length?`<div style="margin-top:2px">${b[2].map(f=>`<span style="display:inline-block;background:#fef2f2;border-radius:6px;padding:1px 6px;margin:2px"><s>${esc(f[0])}</s> → <b style="color:#15803d">${esc(f[1])}</b></span>`).join('')}</div>`:''}</div>`).join('')}</td></tr>`}).join('')}</table></div>`).join('')}</div>`}
-async function g12Brief(t){try{let url=t.resourceURL||'';if(!url&&t.resourcePath)url=await getDownloadURL(ref(storage,t.resourcePath));if(!url)return t.prompt||t.title||'';
+async function g12Brief(t){try{let url=await fileUrl(t);if(!url)return t.prompt||t.title||'';
   const h=await (await fetch(url)).text();const lits=[];
   (h.match(/<script[\s\S]*?<\/script>/gi)||[]).forEach(sc=>{(sc.match(/(["'`])((?:\\.|(?!\1)[^\\])*?)\1/g)||[]).forEach(q=>{const x=q.slice(1,-1).replace(/\\n/g,' ').replace(/<[^>]+>/g,' ').trim();if(x.length>40&&!/[{};=]/.test(x))lits.push(x)})});
   const body=h.replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/\s+/g,' ').trim();
@@ -1041,8 +1039,7 @@ const isSpeakingHtml=t=>t&&t.cat==='Speaking'&&/\.html?$/i.test(t.resourceName||
 async function launchSpeakingTest(t,mode){
  try{
   if(!t.resourcePath)throw Error('No HTML file attached.');
-  let url=t.resourceURL||'';
-  if(!url)url=await getDownloadURL(ref(storage,t.resourcePath));
+  let url=await fileUrl(t);
   if(!/^https:\/\/firebasestorage\.googleapis\.com\//i.test(url))throw Error('Invalid Firebase Storage file URL.');
   clearInterval(timer);page='html-exam';render();
   document.getElementById('content').innerHTML=`<div class="head"><h1>${esc(t.title)}${mode==='preview'?' — Instructor Preview':mode==='practice'?' — Practice':''}</h1><button class="btn secondary" id="backToTests">Leave test</button></div><div class="notice small" style="margin:0 0 10px">Allow microphone access when your browser asks. Do not leave this page until you see “Your speaking test has been submitted”.</div><iframe id="speakFrame" src="${esc(url)}" allow="microphone; fullscreen; autoplay" allowfullscreen style="width:100%;height:80vh;border:1px solid #dcd6c6;border-radius:12px;background:#fff"></iframe>`;
