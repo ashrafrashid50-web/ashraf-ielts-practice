@@ -75,6 +75,18 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // ---------- who is online ----------
+    // Each trainee writes only their own heartbeat; only the instructor can see everyone's.
+    match /presence/{uid} {
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == uid);
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['lastSeen','offline','activity'])
+        && request.resource.data.lastSeen == request.time
+        && request.resource.data.offline is bool
+        && request.resource.data.activity is string && request.resource.data.activity.size() <= 120;
+      allow delete: if isAdmin();
+    }
+
     // ---------- live classes ----------
     // Students request a lesson; only the instructor arranges it.
     match /liveRequests/{id} {
