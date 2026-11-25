@@ -331,6 +331,8 @@ function practiceAdmin(){
  document.querySelectorAll('[data-preplace]').forEach(b=>b.onclick=()=>replacePracticeFile(b.dataset.preplace));
  document.querySelectorAll('[data-pdelete]').forEach(b=>b.onclick=async()=>{const t=byId(b.dataset.pdelete);if(!await ask(`Delete the practice “${t.title}”? Students will no longer see it.`,{ok:'Delete',danger:true}))return;try{await deleteDoc(doc(fs,'tests',t.id));await refresh();practiceAdmin();toast('Practice deleted.',null,'ok')}catch(e){message(e)}});
 }
+// Grade pages number their tests in order: Test 1, Test 2 … A new upload without a name gets the next number.
+const nextTestNo=cat=>1+Math.max(0,...practiceItems().filter(t=>t.cat===cat).map(t=>+((/^test\s*(\d+)$/i.exec(String(t.title).trim())||[])[1]||0)));
 const PRAC_ACCEPT='.html,.htm,.pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,.mp3,.wav,.m4a';
 async function fileUrl(t){if(t.resourcePath){try{return await getDownloadURL(ref(storage,t.resourcePath))}catch(e){if(!t.resourceURL)throw e;console.warn('Fresh link failed, using stored link',e)}}return t.resourceURL||''}
 async function uploadPracticeFile(id,file){const path=`resources/${id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;await uploadBytes(ref(storage,path),file,{contentType:/\.html?$/i.test(file.name)?'text/html':(file.type||'application/octet-stream')});let resourceURL='';try{resourceURL=await getDownloadURL(ref(storage,path))}catch(e){console.warn('Download URL unavailable',e)}return {resourcePath:path,resourceName:file.name,resourceURL}}
@@ -341,8 +343,8 @@ function uploadPractice(){
  f.onsubmit=async e=>{e.preventDefault();if(busy)return;const files=[...f.files.files],btn=document.getElementById('pracSubmit'),name=f.title.value.trim(),cat=f.cat.value,part=f.part.value,active=f.show.checked;
   if(!files.length)return alert('Choose at least one file.');const big=files.filter(x=>x.size>100*1024*1024);if(big.length)return alert('These files exceed 100 MB: '+big.map(x=>x.name).join(', '));
   busy=true;btn.disabled=true;let ok=0,failed=[];
-  try{for(let i=0;i<files.length;i++){const file=files[i];btn.textContent=`Uploading ${i+1} of ${files.length}…`;try{const id=doc(collection(fs,'tests')).id,res=await uploadPracticeFile(id,file),base=file.name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').trim();
-    const title=files.length===1?(name||base):(name?`${name} ${i+1} - ${base}`:base);
+  try{for(let i=0;i<files.length;i++){const file=files[i];btn.textContent=`Uploading ${i+1} of ${files.length}…`;const fk=x=>String(x||'').replace(/^\d{10,}[_-]/,'').replace(/[^a-zA-Z0-9._-]/g,'_').toLowerCase();if(isSchoolArea(PA)&&practiceItems().some(t=>t.cat===cat&&fk(t.resourceName)===fk(file.name))){failed.push(`${file.name}: already on this page – not uploaded again`);continue}try{const id=doc(collection(fs,'tests')).id,res=await uploadPracticeFile(id,file),base=file.name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').trim();
+    const title=isSchoolArea(PA)&&!name?`Test ${nextTestNo(cat)+ok}`:files.length===1?(name||base):(name?`${name} ${i+1} - ${base}`:base);
     await setDoc(doc(fs,'tests',id),{practice:true,...(isSchoolArea(PA)?{area:PA}:{}),cat,part,title,active,assign:[],questions:[],prompt:'',duration:60,...res,createdAt:new Date(Date.now()+i).toISOString(),createdByInstructor:true});ok++}catch(err){failed.push(`${file.name}: ${err.message||err}`)}}
    if(ok){_skillSet(cat,false);closeModal();await refresh();practiceAdmin()}else{btn.disabled=false;btn.textContent='Upload'}
    alert(`${ok} of ${files.length} practice file(s) uploaded${ok?(active?' and visible to students.':' (hidden – switch on Visible when ready).'):'.'}`+(failed.length?'\nFailed:\n'+failed.join('\n'):''))}finally{busy=false}}
